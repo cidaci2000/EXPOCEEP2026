@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+        }
+        h1 { color: #4f46e5; }
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 10px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .game-area {
+            margin: 20px auto;
+            max-width: 380px;
+        }
+        canvas {
+            border: 4px solid #64748b;
+            border-radius: 10px;
+            background: #1e2937;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 PlayHub</h1>
+    <p id="status">Clique em Entrar</p>
+    
+    <button onclick="demoLogin()">Entrar como Demo</button>
+
+    <div id="menu">
+        <button onclick="startSnake()">🐍 Jogar Cobrinha</button>
+        <button onclick="startMemory()">🧠 Jogo da Memória</button>
+    </div>
+
+    <!-- Cobrinha -->
+    <div id="snakeScreen" class="game-area" style="display:none;">
+        <h2>Cobrinha</h2>
+        <p>Pontos: <span id="score">0</span></p>
+        <canvas id="snake" width="360" height="360"></canvas>
+        <br>
+        <button onclick="endSnake()">Finalizar</button>
+        <button onclick="restartSnake()">Reiniciar</button>
+        <p><small>Use as setas ou swipe na tela</small></p>
+    </div>
+
+    <!-- Memória -->
+    <div id="memoryScreen" class="game-area" style="display:none;">
+        <h2>Jogo da Memória</h2>
+        <p>Tentativas: <span id="attempts">0</span> | Tempo: <span id="time">0</span>s</p>
+        <div id="board" style="display:grid; grid-template-columns: repeat(4, 75px); gap:8px; margin:15px auto; justify-content:center;"></div>
+        <button onclick="endMemory()">Finalizar</button>
+    </div>
+
+    <script>
+        let user = null;
+        let snakeInterval, snakeBody, snakeFood, score, dx, dy;
+        
+        function demoLogin() {
+            user = true;
+            document.getElementById('status').innerHTML = '✅ Logado como Demo';
+        }
+
+        function startSnake() {
+            if (!user) return alert("Clique em 'Entrar como Demo' primeiro!");
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('snakeScreen').style.display = 'block';
+            initSnake();
+        }
+
+        function initSnake() {
+            const canvas = document.getElementById('snake');
+            const ctx = canvas.getContext('2d');
+            score = 0;
+            snakeBody = [{x:9, y:9}];
+            snakeFood = {x:15, y:15};
+            dx = 1; dy = 0;
+            document.getElementById('score').textContent = '0';
+
+            if (snakeInterval) clearInterval(snakeInterval);
+            
+            snakeInterval = setInterval(() => {
+                const head = {x: snakeBody[0].x + dx, y: snakeBody[0].y + dy};
+
+                if (head.x < 0 || head.x > 17 || head.y < 0 || head.y > 17 || snakeBody.some(s => s.x === head.x && s.y === head.y)) {
+                    return endSnake();
+                }
+
+                snakeBody.unshift(head);
+                if (head.x === snakeFood.x && head.y === snakeFood.y) {
+                    score += 10;
+                    document.getElementById('score').textContent = score;
+                    snakeFood = {x: Math.floor(Math.random()*18), y: Math.floor(Math.random()*18)};
+                } else {
+                    snakeBody.pop();
+                }
+
+                ctx.fillStyle = '#1e2937';
+                ctx.fillRect(0,0,360,360);
+                ctx.fillStyle = '#22c55e';
+                snakeBody.forEach(s => ctx.fillRect(s.x*20, s.y*20, 20, 20));
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(snakeFood.x*20, snakeFood.y*20, 20, 20);
+            }, 140);
+        }
+
+        function endSnake() {
+            clearInterval(snakeInterval);
+            alert("Game Over! Pontos: " + score);
+            document.getElementById('snakeScreen').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+        }
+
+        function restartSnake() {
+            endSnake();
+            setTimeout(startSnake, 300);
+        }
+
+        // Controles (teclado + swipe)
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('snakeScreen').style.display !== 'block') return;
+            switch(e.key) {
+                case 'ArrowUp': if(dy !== 1) {dx=0; dy=-1;} break;
+                case 'ArrowDown': if(dy !== -1) {dx=0; dy=1;} break;
+                case 'ArrowLeft': if(dx !== 1) {dx=-1; dy=0;} break;
+                case 'ArrowRight': if(dx !== -1) {dx=1; dy=0;} break;
+            }
+        });
+
+        // Memória (simplificada)
+        let memoryCards = [], memoryFlipped = [], memoryTimer;
+        const emojis = ['🍎','🍌','🍒','🍇','🍉','🍓','🥝','🍊'];
+
+        function startMemory() {
+            if (!user) return alert("Clique em 'Entrar como Demo' primeiro!");
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('memoryScreen').style.display = 'block';
+            initMemory();
+        }
+
+        function initMemory() {
+            memoryCards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            memoryFlipped = [];
+            let attempts = 0, time = 0;
+
+            document.getElementById('attempts').textContent = '0';
+            document.getElementById('time').textContent = '0';
+
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+
+            memoryCards.forEach((emoji, i) => {
+                const card = document.createElement('div');
+                card.style = `width:75px;height:75px;background:#334155;border-radius:8px;font-size:35px;display:flex;align-items:center;justify-content:center;`;
+                card.onclick = () => flip(card, i);
+                board.appendChild(card);
+            });
+
+            if (memoryTimer) clearInterval(memoryTimer);
+            memoryTimer = setInterval(() => {
+                time++;
+                document.getElementById('time').textContent = time;
+            }, 1000);
+        }
+
+        function flip(card, index) {
+            if (memoryFlipped.length >= 2) return;
+            card.textContent = memoryCards[index];
+            memoryFlipped.push({card, index});
+
+            if (memoryFlipped.length === 2) {
+                setTimeout(() => {
+                    const [first, second] = memoryFlipped;
+                    if (memoryCards[first.index] === memoryCards[second.index]) {
+                        first.card.style.background = '#22c55e';
+                        second.card.style.background = '#22c55e';
+                    } else {
+                        first.card.textContent = '';
+                        second.card.textContent = '';
+                        first.card.style.background = '#334155';
+                        second.card.style.background = '#334155';
+                    }
+                    memoryFlipped = [];
+                }, 700);
+            }
+        }
+
+        function endMemory() {
+            clearInterval(memoryTimer);
+            alert("Jogo finalizado!");
+            document.getElementById('memoryScreen').style.display = 'none';
+            document.getElementById('menu').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

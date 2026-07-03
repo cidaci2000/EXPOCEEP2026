@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)https://mimi-bloood.github.io/pedro/ -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Galaxy Arcade</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#120022;color:#fff;overflow:hidden}
+#stars{position:fixed;inset:0;background:
+radial-gradient(circle at 20% 20%,#ffffff55 1px,transparent 2px),
+radial-gradient(circle at 80% 40%,#ffffff55 1px,transparent 2px),
+radial-gradient(circle at 50% 70%,#ffffff55 1px,transparent 2px),
+linear-gradient(#120022,#050510);background-size:200px 200px;animation:move 20s linear infinite;z-index:-1}
+@keyframes move{to{background-position:200px 200px,150px 150px,100px 100px,0 0}}
+header{text-align:center;padding:24px}.logo{font-size:42px;color:#7ef;text-shadow:0 0 12px #0ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;max-width:980px;margin:auto;padding:20px}
+.card{background:#ffffff18;border:1px solid #6cf5;padding:18px;border-radius:16px}
+button{padding:10px 16px;border:0;border-radius:10px;background:#6a4cff;color:#fff;cursor:pointer}
+#ov{display:none;position:fixed;inset:0;background:#000b;place-items:center}
+#win{background:#16162d;padding:20px;border-radius:16px;max-width:700px;width:92%}
+canvas{background:#000;border:1px solid #888}
+</style></head><body><div id="stars"></div>
+<header><div class="logo">🌌 Neon Galaxy Arcade</div><p>4 minijogos feito pelo Mimi e Pedro</p></header>
+<div class="grid">
+<div class="card"><h3>⭐ Crystal Clicker</h3><button onclick="openGame(&#39;click&#39;)">Jogar</button></div>
+<div class="card"><h3>🎯 Aim Test</h3><button onclick="openGame(&#39;aim&#39;)">Jogar</button></div>
+<div class="card"><h3>🧠 Memory Colors</h3><button onclick="openGame(&#39;memory&#39;)">Jogar</button></div>
+<div class="card"><h3>🚀 Rocket Catch</h3><button onclick="openGame(&#39;rocket&#39;)">Jogar</button></div>
+</div>
+<div id="ov"><div id="win"><button onclick="closeGame()">Fechar</button><div id="game"></div></div></div>
+<script>
+const ov=document.getElementById('ov'),game=document.getElementById('game');
+let best=+localStorage.best||0;
+function beep(f=440,t=.08){let a=new(window.AudioContext||webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);g.gain.value=.05;o.start();o.stop(a.currentTime+t)}
+function openGame(n){ov.style.display='grid';
+if(n==='click'){let s=0;game.innerHTML=`<h2>Crystal Clicker</h2><p>Recorde: ${best}</p><h1 id=s>0</h1><button id=b>Clique</button>`;
+b.onclick=()=>{s++;beep(500);document.getElementById('s').textContent=s;if(s>best){best=s;localStorage.best=best;}}}
+if(n==='aim'){game.innerHTML='<h2>Aim Test</h2><div id=a style="position:relative;height:300px;background:#111"></div><p>Acertos: <span id=c>0</span></p>';let c=0;function spawn(){a.innerHTML='';let d=document.createElement('div');d.style.cssText='width:30px;height:30px;border-radius:50%;background:red;position:absolute;left:'+Math.random()*260+'px;top:'+Math.random()*240+'px;cursor:pointer';d.onclick=()=>{c++;beep(700);cspan.textContent=c;spawn()};a.appendChild(d)};window.cspan=document.getElementById('c');window.a=document.getElementById('a');spawn();}
+if(n==='memory'){let seq=[],i=0;for(let k=0;k<4;k++)seq.push(Math.floor(Math.random()*4));let colors=['🟪','🟦','🟩','🟥'];game.innerHTML='<h2>Memory</h2><p>Memorize: '+seq.map(x=>colors[x]).join(' ')+'</p><p>Reabra para nova sequência!</p>';}
+if(n==='rocket'){game.innerHTML='<h2>Rocket Catch</h2><canvas id=cv width=300 height=400></canvas>';let c=cv.getContext('2d'),x=150,s=0,y=0,mx=150;cv.onmousemove=e=>mx=e.offsetX;function loop(){x+=(mx-x)*.2;y+=3;if(y>400){y=0;starX=Math.random()*280}c.clearRect(0,0,300,400);c.fillStyle='cyan';c.fillRect(x-10,360,20,30);c.fillStyle='yellow';c.beginPath();c.arc(starX, y,8,0,7);c.fill();if(Math.abs(x-starX)<18&&Math.abs(y-375)<18){s++;beep(800);y=0;starX=Math.random()*280}c.fillStyle='#fff';c.fillText('Pontos:'+s,10,20);requestAnimationFrame(loop)}let starX=120;loop();}
+}
+function closeGame(){ov.style.display='none';game.innerHTML='';}
+</script></body></html>

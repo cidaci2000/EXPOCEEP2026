@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)https://pedropilatticanal-spec.github.io/jogo-escola/?authuser=0 -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Escolar - 3 Jogos</title>
+  <style>
+    :root {
+      --neon: #00ffcc;
+      --bg: #0a0a1f;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #0a0a1f, #1a0033);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    header {
+      margin-bottom: 30px;
+    }
+    h1 {
+      font-size: 3rem;
+      text-shadow: 0 0 20px var(--neon);
+      margin-bottom: 10px;
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      background: transparent;
+      color: var(--neon);
+      border: 2px solid var(--neon);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: var(--neon);
+      color: #000;
+      box-shadow: 0 0 20px var(--neon);
+    }
+    .game-container {
+      display: none;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .active { display: block; }
+    .game {
+      background: rgba(0, 0, 0, 0.6);
+      border: 3px solid var(--neon);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+    }
+    /* Jogo da Velha */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #1a0033;
+      border: 3px solid var(--neon);
+      font-size: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    /* Jogo da Memória */
+    #memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+    .card-front { background: #00ffcc; color: #000; }
+    .card-back { background: #330066; transform: rotateY(180deg); }
+
+    /* Snake */
+    #snake-canvas {
+      border: 4px solid var(--neon);
+      background: #000;
+      image-rendering: pixelated;
+    }
+    .score {
+      font-size: 1.5rem;
+      margin: 15px 0;
+    }
+    footer {
+      margin-top: 40px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎮 ARCADE ESCOLAR</h1>
+    <p>3 jogos clássicos feitos com carinho</p>
+  </header>
+
+  <div class="nav">
+    <button onclick="showGame(&#39;home&#39;)">🏠 Início</button>
+    <button onclick="showGame(&#39;ttt&#39;)">⭕ Jogo da Velha</button>
+    <button onclick="showGame(&#39;memory&#39;)">🧠 Memória</button>
+    <button onclick="showGame(&#39;snake&#39;)">🐍 Cobrinha</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="home" class="game-container active">
+    <div class="game">
+      <h2>Bem-vindo!</h2>
+      <p>Escolha um dos jogos acima para começar.</p>
+      <p>Feito para o trabalho de Programação de Jogos 🎓</p>
+    </div>
+  </div>
+
+  <!-- JOGO DA VELHA -->
+  <div id="ttt" class="game-container">
+    <div class="game">
+      <h2>Jogo da Velha</h2>
+      <div class="score">X: <span id="scoreX">0</span> | O: <span id="scoreO">0</span></div>
+      <div id="board"><div class="cell" data-index="0"></div><div class="cell" data-index="1"></div><div class="cell" data-index="2"></div><div class="cell" data-index="3"></div><div class="cell" data-index="4"></div><div class="cell" data-index="5"></div><div class="cell" data-index="6"></div><div class="cell" data-index="7"></div><div class="cell" data-index="8"></div></div>
+      <p id="ttt-status">Sua vez (X)</p>
+      <button onclick="resetTTT()">Novo Jogo</button>
+    </div>
+  </div>
+
+  <!-- MEMÓRIA -->
+  <div id="memory" class="game-container">
+    <div class="game">
+      <h2>Jogo da Memória</h2>
+      <div class="score">Pontos: <span id="memory-score">0</span></div>
+      <div id="memory-grid"><div class="card" data-index="0">
+          <div class="card-inner">
+            <div class="card-front">🐯</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="1">
+          <div class="card-inner">
+            <div class="card-front">🐵</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="2">
+          <div class="card-inner">
+            <div class="card-front">🐵</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="3">
+          <div class="card-inner">
+            <div class="card-front">🐼</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="4">
+          <div class="card-inner">
+            <div class="card-front">🐨</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="5">
+          <div class="card-inner">
+            <div class="card-front">🐶</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="6">
+          <div class="card-inner">
+            <div class="card-front">🐼</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="7">
+          <div class="card-inner">
+            <div class="card-front">🐶</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="8">
+          <div class="card-inner">
+            <div class="card-front">🦊</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="9">
+          <div class="card-inner">
+            <div class="card-front">🦁</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="10">
+          <div class="card-inner">
+            <div class="card-front">🐱</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="11">
+          <div class="card-inner">
+            <div class="card-front">🐱</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="12">
+          <div class="card-inner">
+            <div class="card-front">🦁</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="13">
+          <div class="card-inner">
+            <div class="card-front">🐨</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="14">
+          <div class="card-inner">
+            <div class="card-front">🦊</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div><div class="card" data-index="15">
+          <div class="card-inner">
+            <div class="card-front">🐯</div>
+            <div class="card-back">❓</div>
+          </div>
+        </div></div>
+      <button onclick="resetMemory()">Reiniciar Jogo</button>
+    </div>
+  </div>
+
+  <!-- COBRINHA -->
+  <div id="snake" class="game-container">
+    <div class="game">
+      <h2>Cobrinha</h2>
+      <div class="score">Pontos: <span id="snake-score">0</span></div>
+      <canvas id="snake-canvas" width="400" height="400"></canvas>
+      <p>Use as setas do teclado ↑ ↓ ← → </p>
+      <button onclick="startSnake()">Iniciar / Reiniciar</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>Projeto feito para a escola • GitHub Pages</p>
+  </footer>
+
+  <script>
+    let currentGame = 'home';
+
+    function showGame(game) {
+      document.querySelectorAll('.game-container').forEach(div => div.classList.remove('active'));
+      document.getElementById(game).classList.add('active');
+      currentGame = game;
+      if (game === 'snake' && !snakeInterval) startSnake();
+    }
+
+    // ===================== JOGO DA VELHA =====================
+    let board = Array(9).fill(null);
+    let currentPlayer = 'X';
+    let scoreX = 0, scoreO = 0;
+    let gameOver = false;
+
+    function createBoard() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+      board = Array(9).fill(null);
+      currentPlayer = 'X';
+      gameOver = false;
+      document.getElementById('ttt-status').textContent = "Sua vez (X)";
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleClick);
+        boardEl.appendChild(cell);
+      }
+    }
+
+    function handleClick(e) {
+      const index = parseInt(e.target.dataset.index);
+      if (board[index] || gameOver) return;
+
+      board[index] = currentPlayer;
+      e.target.textContent = currentPlayer;
+
+      if (checkWin(currentPlayer)) {
+        gameOver = true;
+        if (currentPlayer === 'X') scoreX++;
+        else scoreO++;
+        updateScore();
+        document.getElementById('ttt-status').textContent = `${currentPlayer} venceu!`;
+        return;
+      }
+
+      if (board.every(cell => cell)) {
+        gameOver = true;
+        document.getElementById('ttt-status').textContent = "Empate!";
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      document.getElementById('ttt-status').textContent = `Vez do ${currentPlayer}`;
+
+      if (currentPlayer === 'O') setTimeout(aiMove, 500);
+    }
+
+    function aiMove() {
+      let empty = board.map((val, i) => val === null ? i : null).filter(v => v !== null);
+      if (empty.length === 0) return;
+      const move = empty[Math.floor(Math.random() * empty.length)];
+      board[move] = 'O';
+      document.querySelector(`.cell[data-index="${move}"]`).textContent = 'O';
+
+      if (checkWin('O')) {
+        scoreO++;
+        updateScore();
+        gameOver = true;
+        document.getElementById('ttt-status').textContent = "O venceu!";
+      } else if (board.every(cell => cell)) {
+        document.getElementById('ttt-status').textContent = "Empate!";
+        gameOver = true;
+      } else {
+        currentPlayer = 'X';
+        document.getElementById('ttt-status').textContent = "Sua vez (X)";
+      }
+    }
+
+    function checkWin(player) {
+      const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      return wins.some(combo => combo.every(i => board[i] === player));
+    }
+
+    function updateScore() {
+      document.getElementById('scoreX').textContent = scoreX;
+      document.getElementById('scoreO').textContent = scoreO;
+    }
+
+    function resetTTT() {
+      createBoard();
+    }
+
+    // ===================== JOGO DA MEMÓRIA =====================
+    const emojis = ['🐱','🐶','🐵','🦊','🐼','🐨','🐯','🦁'];
+    let memoryCards = [];
+    let flipped = [];
+    let matched = 0;
+
+    function createMemory() {
+      memoryCards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+      matched = 0;
+      flipped = [];
+      document.getElementById('memory-score').textContent = '0';
+
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = '';
+
+      memoryCards.forEach((emoji, i) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.index = i;
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">${emoji}</div>
+            <div class="card-back">❓</div>
+          </div>
+        `;
+        card.addEventListener('click', flipCard);
+        grid.appendChild(card);
+      });
+    }
+
+    function flipCard(e) {
+      const card = e.currentTarget;
+      if (flipped.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+      card.classList.add('flipped');
+      flipped.push(card);
+
+      if (flipped.length === 2) {
+        const [card1, card2] = flipped;
+        const emoji1 = memoryCards[card1.dataset.index];
+        const emoji2 = memoryCards[card2.dataset.index];
+
+        if (emoji1 === emoji2) {
+          card1.classList.add('matched');
+          card2.classList.add('matched');
+          matched += 2;
+          document.getElementById('memory-score').textContent = matched;
+          flipped = [];
+          if (matched === 16) alert("🎉 Parabéns! Você completou o jogo da memória!");
+        } else {
+          setTimeout(() => {
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            flipped = [];
+          }, 1000);
+        }
+      }
+    }
+
+    function resetMemory() {
+      createMemory();
+    }
+
+    // ===================== COBRINHA =====================
+    let snake = [{x: 10, y: 10}];
+    let dx = 1, dy = 0;
+    let food = {x: 15, y: 15};
+    let score = 0;
+    let snakeInterval = null;
+    const canvas = document.getElementById('snake-canvas');
+    const ctx = canvas.getContext('2d');
+    const grid = 20;
+
+    function drawSnake() {
+      ctx.fillStyle = '#00ffcc';
+      snake.forEach(part => ctx.fillRect(part.x * grid, part.y * grid, grid - 2, grid - 2));
+    }
+
+    function drawFood() {
+      ctx.fillStyle = '#ff00aa';
+      ctx.fillRect(food.x * grid, food.y * grid, grid - 2, grid - 2);
+    }
+
+    function moveSnake() {
+      const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+      // Colisão com parede
+      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+        gameOverSnake();
+        return;
+      }
+
+      // Colisão com corpo
+      if (snake.some(part => part.x === head.x && part.y === head.y)) {
+        gameOverSnake();
+        return;
+      }
+
+      snake.unshift(head);
+
+      // Comeu comida?
+      if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        document.getElementById('snake-score').textContent = score;
+        food = {
+          x: Math.floor(Math.random() * 20),
+          y: Math.floor(Math.random() * 20)
+        };
+      } else {
+        snake.pop();
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSnake();
+      drawFood();
+    }
+
+    function gameOverSnake() {
+      clearInterval(snakeInterval);
+      snakeInterval = null;
+      alert(`Game Over! Sua pontuação: ${score}`);
+    }
+
+    function startSnake() {
+      if (snakeInterval) clearInterval(snakeInterval);
+      
+      snake = [{x: 10, y: 10}];
+      dx = 1; dy = 0;
+      score = 0;
+      document.getElementById('snake-score').textContent = '0';
+      food = {x: 15, y: 15};
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSnake();
+      drawFood();
+
+      snakeInterval = setInterval(moveSnake, 120);
+    }
+
+    // Controles da cobrinha
+    document.addEventListener('keydown', e => {
+      if (currentGame !== 'snake') return;
+      switch(e.key) {
+        case 'ArrowUp':    if (dy !== 1) { dx = 0; dy = -1; } break;
+        case 'ArrowDown':  if (dy !== -1) { dx = 0; dy = 1; } break;
+        case 'ArrowLeft':  if (dx !== 1) { dx = -1; dy = 0; } break;
+        case 'ArrowRight': if (dx !== -1) { dx = 1; dy = 0; } break;
+      }
+    });
+
+    // Inicialização
+    window.onload = () => {
+      createBoard();
+      createMemory();
+      // Snake inicia manualmente
+    };
+  </script>
+
+</body></html>

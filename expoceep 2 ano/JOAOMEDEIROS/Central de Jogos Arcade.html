@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://joaofranklinmedeiros-cell.github.io/projeto-expoceep/?authuser=0 -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Jogos Arcade</title>
+    <link rel="stylesheet" href="./Central de Jogos Arcade_files/index.css">
+</head>
+<body>
+
+    <header>
+        <h1>🎮 Arcade Central 🎮</h1>
+        <p>Escolha um jogo e divirta-se!</p>
+    </header>
+
+    <main class="menu-jogos" id="menu-jogos">
+        <div class="card-jogo" onclick="iniciarJogo(&#39;velha&#39;)">
+            <h3>Jogo da Velha</h3>
+            <p>O clássico desafio de X contra O.</p>
+        </div>
+        <div class="card-jogo" onclick="iniciarJogo(&#39;memoria&#39;)">
+            <h3>Jogo da Memória</h3>
+            <p>Encontre os pares de cartas iguais.</p>
+        </div>
+        <div class="card-jogo" onclick="iniciarJogo(&#39;adivinha&#39;)">
+            <h3>Adivinhe o Número</h3>
+            <p>Tente acertar o número secreto de 1 a 100.</p>
+        </div>
+        <div class="card-jogo" onclick="iniciarJogo(&#39;clique&#39;)">
+            <h3>Clicker Veloz</h3>
+            <p>Quantos cliques você consegue em 10 segundos?</p>
+        </div>
+    </main>
+
+    <section class="container-jogo hidden" id="container-jogo">
+        <button class="btn-voltar" onclick="voltarAoMenu()">⬅ Voltar ao Menu</button>
+        <div id="area-jogo"></div>
+    </section>
+
+    <script src="./Central de Jogos Arcade_files/javascript.js.download"></script>
+
+</body></html>

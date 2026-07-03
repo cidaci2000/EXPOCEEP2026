@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://imdropp.github.io/trabahlo/?authuser=0 -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purple Galaxy Arcade</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
+body{
+background:linear-gradient(135deg,#140024,#2b0052,#4c1d95);
+min-height:100vh;color:white;overflow-x:hidden;
+}
+.stars{position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(2px 2px at 20% 30%,white,transparent),
+radial-gradient(2px 2px at 70% 20%,white,transparent),
+radial-gradient(1px 1px at 40% 70%,white,transparent),
+radial-gradient(2px 2px at 85% 60%,white,transparent),
+radial-gradient(1px 1px at 10% 80%,white,transparent);}
+.container{max-width:1000px;margin:auto;padding:30px}
+h1{text-align:center;font-size:3rem;margin-bottom:10px}
+.subtitle{text-align:center;margin-bottom:30px}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(8px);
+padding:25px;border-radius:20px;text-align:center;
+cursor:pointer;transition:.3s;
+}
+.card:hover{transform:translateY(-8px);box-shadow:0 0 25px #b266ff}
+.section{display:none;text-align:center}
+.active{display:block}
+button{
+background:#a855f7;color:white;border:none;padding:12px 18px;
+border-radius:12px;margin:8px;cursor:pointer
+}
+input{padding:10px;border-radius:10px;border:none}
+.memory-grid{
+display:grid;grid-template-columns:repeat(4,80px);
+gap:10px;justify-content:center;margin-top:20px
+}
+.memory-card{
+width:80px;height:80px;background:#7c3aed;
+display:flex;justify-content:center;align-items:center;
+font-size:2rem;border-radius:10px;cursor:pointer
+}
+.back{margin-top:20px}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<div class="container">
+
+<div id="menu" class="active">
+<h1>🌌 Purple Galaxy Arcade</h1>
+<p class="subtitle">Escolha seu desafio!</p>
+
+<div class="menu">
+<div class="card" onclick="showGame(&#39;ppt&#39;)">✂️<h3>Pedra Papel Tesoura</h3></div>
+<div class="card" onclick="showGame(&#39;numero&#39;)">🎲<h3>Adivinhe o Número</h3></div>
+<div class="card" onclick="showGame(&#39;reflexo&#39;)">⚡<h3>Teste de Reflexo</h3></div>
+<div class="card" onclick="showGame(&#39;memoria&#39;)">🧠<h3>Jogo da Memória</h3></div>
+</div>
+</div>
+
+<div id="ppt" class="section">
+<h1>✂️ Pedra Papel Tesoura</h1>
+<button onclick="ppt(&#39;Pedra&#39;)">Pedra</button>
+<button onclick="ppt(&#39;Papel&#39;)">Papel</button>
+<button onclick="ppt(&#39;Tesoura&#39;)">Tesoura</button>
+<h2 id="pptResultado"></h2>
+<button class="back" onclick="goMenu()">Voltar</button>
+</div>
+
+<div id="numero" class="section">
+<h1>🎲 Adivinhe o Número</h1>
+<input id="palpite" type="number">
+<button onclick="verificarNumero()">Tentar</button>
+<h2 id="numeroMsg"></h2>
+<button class="back" onclick="goMenu()">Voltar</button>
+</div>
+
+<div id="reflexo" class="section">
+<h1>⚡ Teste de Reflexo</h1>
+<button id="reflexBtn" onclick="clicouReflexo()">CLIQUE!</button>
+<h2 id="tempo"></h2>
+<button class="back" onclick="goMenu()">Voltar</button>
+</div>
+
+<div id="memoria" class="section">
+<h1>🧠 Jogo da Memória</h1>
+<div id="memoryGrid" class="memory-grid"><div class="memory-card" data-valor="⭐">?</div><div class="memory-card" data-valor="🚀">?</div><div class="memory-card" data-valor="⭐">?</div><div class="memory-card" data-valor="🪐">?</div><div class="memory-card" data-valor="🌙">?</div><div class="memory-card" data-valor="🚀">?</div><div class="memory-card" data-valor="🪐">?</div><div class="memory-card" data-valor="🌙">?</div></div>
+<h2 id="memoryMsg"></h2>
+<button onclick="criarMemoria()">Reiniciar</button>
+<button class="back" onclick="goMenu()">Voltar</button>
+</div>
+
+</div>
+
+<script>
+function showGame(id){
+document.getElementById('menu').style.display='none';
+document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+document.getElementById(id).style.display='block';
+}
+function goMenu(){
+document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+document.getElementById('menu').style.display='block';
+}
+
+function ppt(escolha){
+const op=['Pedra','Papel','Tesoura'];
+const pc=op[Math.floor(Math.random()*3)];
+document.getElementById('pptResultado').innerHTML=
+`Você: ${escolha}<br>Computador: ${pc}`;
+}
+
+let numero=Math.floor(Math.random()*100)+1;
+function verificarNumero(){
+let v=parseInt(document.getElementById('palpite').value);
+let msg=v===numero?'🎉 Acertou!':v<numero?'⬆️ Maior':'⬇️ Menor';
+document.getElementById('numeroMsg').textContent=msg;
+}
+
+let inicio=0;
+setTimeout(()=>{
+let b=document.getElementById('reflexBtn');
+if(b){b.textContent='CLIQUE!';inicio=Date.now();}
+},2000+Math.random()*3000);
+
+function clicouReflexo(){
+if(inicio){
+document.getElementById('tempo').textContent=
+'Tempo: '+(Date.now()-inicio)+' ms';
+}
+}
+
+let primeira=null,segunda=null,travado=false,encontrados=0;
+function criarMemoria(){
+const emojis=['🌙','🌙','⭐','⭐','🚀','🚀','🪐','🪐'];
+const embaralhado=emojis.sort(()=>Math.random()-0.5);
+const grid=document.getElementById('memoryGrid');
+grid.innerHTML='';
+encontrados=0;
+document.getElementById('memoryMsg').textContent='';
+primeira=segunda=null;
+
+embaralhado.forEach(e=>{
+const card=document.createElement('div');
+card.className='memory-card';
+card.dataset.valor=e;
+card.textContent='?';
+card.onclick=()=>virar(card);
+grid.appendChild(card);
+});
+}
+
+function virar(card){
+if(travado||card===primeira||card.textContent!=='?') return;
+
+card.textContent=card.dataset.valor;
+
+if(!primeira){primeira=card;return;}
+segunda=card;
+
+if(primeira.dataset.valor===segunda.dataset.valor){
+encontrados++;
+primeira=segunda=null;
+if(encontrados===4){
+document.getElementById('memoryMsg').textContent='🎉 Você venceu!';
+}
+}else{
+travado=true;
+setTimeout(()=>{
+primeira.textContent='?';
+segunda.textContent='?';
+primeira=segunda=null;
+travado=false;
+},800);
+}
+}
+criarMemoria();
+</script>
+
+
+</body></html>

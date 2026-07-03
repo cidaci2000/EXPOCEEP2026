@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///C:/Users/apare/Downloads/index%20(4).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Jogos Arcade</title>
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .btn-voltar {
+            background: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Estilos do Dashboard (Catálogo e Ranking) */
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .jogos {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card-jogo {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .btn-jogar {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .btn-jogar:hover { background: #218838; }
+        .btn-rank {
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .btn-rank:hover { background: #0069d9; }
+        .ranking {
+            flex: 1;
+            min-width: 300px;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        th { background-color: #252525; }
+
+        /* Estilos da Tela do Jogo */
+        .tela-jogo {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #areaJogo {
+            background: #1e1e1e;
+            width: 100%;
+            height: 350px;
+            margin: 20px auto;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #007bff;
+            position: relative;
+        }
+        .btn-clique {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: #ffc107;
+            border: none;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px #d39e00;
+        }
+        .btn-clique:active {
+            box-shadow: 0 2px #d39e00;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="vistaDashboard">
+        <div class="header">
+            <h1>🎮 Central de Jogos Arcade</h1>
+            <div>
+                <label for="nomeJogador">Seu Nome: </label>
+                <input type="text" id="nomeJogador" value="Jogador Anonimo" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #333; color: white;">
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="jogos">
+                <div class="card-jogo">
+                    <h2>Clicker Veloz</h2>
+                    <p>Clique no botão o máximo de vezes que conseguir antes do tempo acabar!</p>
+                    <button class="btn-jogar" onclick="irParaJogo(&#39;clicker&#39;)">Jogar</button>
+                    <button class="btn-rank" onclick="mostrarRanking(&#39;clicker&#39;)">Ver Rank</button>
+                </div>
+                <div class="card-jogo">
+                    <h2>Mental Quiz</h2>
+                    <p>Teste seus reflexos de matemática! Acerte o máximo de contas simples rápido.</p>
+                    <button class="btn-jogar" onclick="irParaJogo(&#39;quiz&#39;)">Jogar</button>
+                    <button class="btn-rank" onclick="mostrarRanking(&#39;quiz&#39;)">Ver Rank</button>
+                </div>
+            </div>
+
+            <div class="ranking">
+                <h2>🏆 Top Líderes (<span id="nomeJogoRanking">Selecione um jogo</span>)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Jogador</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaRanking">
+                        <tr><td colspan="3">Clique em "Ver Rank" em um dos jogos.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="vistaJogo" class="tela-jogo" style="display: none;">
+        <div class="header">
+            <h1 id="tituloJogo">Jogando...</h1>
+            <button class="btn-voltar" onclick="voltarParaDashboard()">Sair do Jogo</button>
+        </div>
+        
+        <h2 id="cronometro">Tempo Restante: <span id="tempo">10</span>s</h2>
+
+        <div id="areaJogo">
+            <div id="conteudoDinamico"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- GERENCIAMENTO DE ESTADO E TELAS ---
+        let jogoAtual = '';
+        let score = 0;
+        let tempo = 10;
+        let jogoRodando = false;
+        let intervaloCronometro;
+        let respostaCorretaQuiz = 0; // Exclusivo do jogo do Quiz
+
+        // Banco de dados simulado no LocalStorage do Navegador
+        if (!localStorage.getItem('bancoPontuacoes')) {
+            localStorage.setItem('bancoPontuacoes', JSON.stringify([]));
+        }
+
+        function irParaJogo(nomeJogo) {
+            jogoAtual = nomeJogo;
+            document.getElementById('vistaDashboard').style.display = 'none';
+            document.getElementById('vistaJogo').style.display = 'block';
+            document.getElementById('tituloJogo').innerText = nomeJogo === 'clicker' ? "Jogo: Clicker Veloz" : "Jogo: Mental Quiz";
+            
+            resetarEstruturaJogo();
+        }
+
+        function voltarParaDashboard() {
+            clearInterval(intervaloCronometro);
+            jogoRodando = false;
+            document.getElementById('vistaJogo').style.display = 'none';
+            document.getElementById('vistaDashboard').style.display = 'block';
+            mostrarRanking(jogoAtual || 'clicker');
+        }
+
+        function resetarEstruturaJogo() {
+            tempo = 10;
+            score = 0;
+            jogoRodando = false;
+            document.getElementById('tempo').innerText = tempo;
+            
+            const area = document.getElementById('conteudoDinamico');
+            if (jogoAtual === 'clicker') {
+                area.innerHTML = `
+                    <h3 id="instrucao">Clique no botão para INICIAR!</h3>
+                    <button id="btnAcao" class="btn-clique" onclick="jogarClicker()">START</button>
+                    <h3 id="placar" style="margin-top:15px; display:none;">Cliques: <span id="scoreAtual">0</span></h3>
+                `;
+            } else if (jogoAtual === 'quiz') {
+                area.innerHTML = `
+                    <h3>Responda rápido as equações!</h3>
+                    <button id="btnAcao" class="btn-jogar" onclick="jogarQuiz()">START JOGO</button>
+                    <div id="boxQuiz" style="display:none; margin-top:15px;">
+                        <h2 id="perguntaMatematica" style="color:#ffc107;">2 + 2 = ?</h2>
+                        <input type="number" id="respostaQuiz" style="padding:10px; font-size:18px; width:80px; text-align:center;">
+                        <button onclick="checarRespostaQuiz()" style="padding:10px; font-size:16px;">Enviar</button>
+                        <h3 style="margin-top:10px;">Acertos: <span id="scoreAtual">0</span></h3>
+                    </div>
+                `;
+            }
+        }
+
+        function iniciarCronometro(funcaoFinalizar) {
+            jogoRodando = true;
+            intervaloCronometro = setInterval(() => {
+                tempo--;
+                document.getElementById('tempo').innerText = tempo;
+                if (tempo <= 0) {
+                    clearInterval(intervaloCronometro);
+                    jogoRodando = false;
+                    funcaoFinalizar();
+                }
+            }, 1000);
+        }
+
+        // --- LÓGICA DO JOGO 1: CLICKER ---
+        function jogarClicker() {
+            if (!jogoRodando) {
+                document.getElementById('instrucao').style.display = 'none';
+                document.getElementById('placar').style.display = 'block';
+                document.getElementById('btnAcao').innerText = 'CLIQUE!';
+                iniciarCronometro(finalizarPartida);
+            } else {
+                score++;
+                document.getElementById('scoreAtual').innerText = score;
+            }
+        }
+
+        // --- LÓGICA DO JOGO 2: QUIZ MENTAL ---
+        function jogarQuiz() {
+            document.getElementById('btnAcao').style.display = 'none';
+            document.getElementById('boxQuiz').style.display = 'block';
+            gerarPerguntaQuiz();
+            iniciarCronometro(finalizarPartida);
+            document.getElementById('respostaQuiz').focus();
+        }
+
+        function gerarPerguntaQuiz() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            respostaCorretaQuiz = num1 + num2;
+            document.getElementById('perguntaMatematica').innerText = `${num1} + ${num2} = ?`;
+            document.getElementById('respostaQuiz').value = '';
+        }
+
+        function checarRespostaQuiz() {
+            if (!jogoRodando) return;
+            const respostaUser = parseInt(document.getElementById('respostaQuiz').value);
+            if (respostaUser === respostaCorretaQuiz) {
+                score++;
+                document.getElementById('scoreAtual').innerText = score;
+            }
+            gerarPerguntaQuiz();
+            document.getElementById('respostaQuiz').focus();
+        }
+        // Atalho para o "Enter" no input do quiz
+        document.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter' && jogoAtual === 'quiz' && jogoRodando) {
+                checarRespostaQuiz();
+            }
+        });
+
+        // --- SALVAR RESULTADOS E RANKING ---
+        function finalizarPartida() {
+            const nomeUser = document.getElementById('nomeJogador').value || 'Anônimo';
+            document.getElementById('conteudoDinamico').innerHTML = `
+                <h2>Fim de Jogo!</h2>
+                <p>Sua pontuação final foi: <strong>${score}</strong></p>
+                <button class="btn-jogar" onclick="resetarEstruturaJogo()">Jogar Novamente</button>
+            `;
+
+            // Salva no LocalStorage
+            const banco = JSON.parse(localStorage.getItem('bancoPontuacoes'));
+            banco.push({
+                jogador: nomeUser,
+                jogo: jogoAtual,
+                score: score,
+                data: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('bancoPontuacoes', JSON.stringify(banco));
+        }
+
+        function mostrarRanking(nomeJogo) {
+            document.getElementById('nomeJogoRanking').innerText = nomeJogo.toUpperCase();
+            const banco = JSON.parse(localStorage.getItem('bancoPontuacoes'));
+            
+            // Filtra pelo jogo atual e ordena do maior score para o menor
+            const dadosFiltrados = banco
+                .filter(p => p.jogo === nomeJogo)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 5); // Top 5
+
+            const tabela = document.getElementById('tabelaRanking');
+            tabela.innerHTML = '';
+
+            if (dadosFiltrados.length === 0) {
+                tabela.innerHTML = '<tr><td colspan="3">Nenhuma pontuação registrada neste jogo.</td></tr>';
+                return;
+            }
+
+            dadosFiltrados.forEach((p, index) => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td><strong>${index + 1}º</strong></td>
+                        <td>${p.jogador}</td>
+                        <td>${p.score} pts</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+
+</body></html>

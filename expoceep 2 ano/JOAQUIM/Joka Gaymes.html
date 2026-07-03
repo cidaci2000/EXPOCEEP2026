@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://joaquimichel18.github.io/joca/?authuser=0 -->
+<html lang="pt-br"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Joka Gaymes  </title>
+
+<style>
+
+/* =========================
+   🎨 TEMA (CUSTOMIZE AQUI)
+========================= */
+:root {
+  --bg1: #0f172a;
+  --bg2: #1e293b;
+  --card: #1e293b;
+  --accent: #3b82f6;
+  --accentHover: #2563eb;
+  --text: #ffffff;
+}
+
+/* BASE */
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: var(--text);
+  text-align: center;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accentHover);
+}
+
+/* TELAS */
+.screen { display: none; }
+.active { display: block; }
+
+/* VELHA */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 6px;
+  justify-content: center;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background: var(--card);
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+/* MEMÓRIA */
+.memory {
+  display: grid;
+  grid-template-columns: repeat(4, 80px);
+  gap: 10px;
+  justify-content: center;
+}
+
+.card {
+  width: 80px;
+  height: 80px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="screen">
+  <h1>🎮 Arcade Customizável</h1>
+  <input id="username" placeholder="Seu nome">
+  <br>
+  <button onclick="login()">Entrar</button>
+</div>
+
+<!-- MENU -->
+<div id="menu" class="screen active">
+  <h2>Olá, <span id="user">DDD</span></h2>
+
+  <button onclick="openGame(&#39;velha&#39;); initVelha()">❌ Jogo da Velha</button>
+  <button onclick="openGame(&#39;memoria&#39;); startMemory()">🧠 Memória</button>
+
+  <h3>🏆 Ranking</h3>
+  <div id="ranking"></div>
+</div>
+
+<!-- VELHA -->
+<div id="velha" class="screen">
+  <h2>Jogo da Velha</h2>
+  <div class="board" id="board"></div>
+  <p id="status"></p>
+  <button onclick="initVelha()">Reiniciar</button>
+  <button onclick="back()">Voltar</button>
+</div>
+
+<!-- MEMÓRIA -->
+<div id="memoria" class="screen">
+  <h2>Jogo da Memória</h2>
+  <p>Movimentos: <span id="moves"></span></p>
+  <p>Pontos: <span id="score"></span></p>
+  <div class="memory" id="memory"></div>
+  <button onclick="startMemory()">Reiniciar</button>
+  <button onclick="back()">Voltar</button>
+</div>
+
+<script>
+
+/* =========================
+   ⚙️ CONFIGURAÇÃO (CUSTOMIZE AQUI)
+========================= */
+const SETTINGS = {
+  scoreVelhaWin: 10,
+  scoreMemoryMatch: 5,
+  memoryEmojis: ['🍎','🍌','🍇','🍓','🍒','🥝','🍍','🍉']
+};
+
+/* USUÁRIO */
+let user = "";
+
+/* LOGIN */
+function login(){
+  const name = document.getElementById("username").value;
+  if(!name) return;
+
+  user = name;
+  document.getElementById("user").innerText = user;
+  show("menu");
+  updateRanking();
+}
+
+/* NAV */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function openGame(id){ show(id); }
+function back(){ show("menu"); updateRanking(); }
+
+/* =========================
+   STORAGE / RANKING
+========================= */
+function getData(){
+  return JSON.parse(localStorage.getItem("rank") || "{}");
+}
+
+function saveData(d){
+  localStorage.setItem("rank", JSON.stringify(d));
+}
+
+function addScore(game, pts){
+  const data = getData();
+  if(!data[user]) data[user] = { velha:0, memoria:0 };
+
+  data[user][game] += pts;
+  saveData(data);
+  updateRanking();
+}
+
+function updateRanking(){
+  const data = getData();
+  const list = [];
+
+  Object.keys(data).forEach(u => {
+    const total = data[u].velha + data[u].memoria;
+    list.push({u, total});
+  });
+
+  list.sort((a,b)=>b.total-a.total);
+
+  document.getElementById("ranking").innerHTML =
+    list.slice(0,5).map((p,i)=>
+      `${i+1}. ${p.u} - ${p.total} pts`
+    ).join("<br>");
+}
+
+/* =========================
+   ❌ VELHA
+========================= */
+let board, player, gameOver;
+
+function initVelha(){
+  board = Array(9).fill('');
+  player = 'X';
+  gameOver = false;
+
+  const el = document.getElementById("board");
+  el.innerHTML = '';
+
+  board.forEach((_,i)=>{
+    const c = document.createElement("div");
+    c.className = "cell";
+    c.onclick = () => move(i,c);
+    el.appendChild(c);
+  });
+
+  document.getElementById("status").innerText = "Vez de X";
+}
+
+function move(i,c){
+  if(board[i] || gameOver) return;
+
+  board[i]=player;
+  c.innerText=player;
+
+  if(win(player)){
+    document.getElementById("status").innerText = player+" venceu!";
+    gameOver=true;
+    addScore("velha", SETTINGS.scoreVelhaWin);
+    return;
+  }
+
+  if(!board.includes('')){
+    document.getElementById("status").innerText="Empate!";
+    gameOver=true;
+    return;
+  }
+
+  player = player==='X'?'O':'X';
+}
+
+function win(p){
+  return [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ].some(c=>c.every(i=>board[i]===p));
+}
+
+/* =========================
+   🧠 MEMÓRIA
+========================= */
+let first, second, lock, moves, score;
+
+function startMemory(){
+  const cards = [...SETTINGS.memoryEmojis, ...SETTINGS.memoryEmojis]
+    .sort(()=>Math.random()-0.5);
+
+  const el = document.getElementById("memory");
+  el.innerHTML = '';
+
+  first=second=null;
+  lock=false;
+  moves=0;
+  score=0;
+
+  document.getElementById("moves").innerText=moves;
+  document.getElementById("score").innerText=score;
+
+  cards.forEach(v=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.innerText="?";
+    c.dataset.v=v;
+    c.onclick=()=>flip(c);
+    el.appendChild(c);
+  });
+}
+
+function flip(c){
+  if(lock || c.innerText!=="?") return;
+
+  c.innerText=c.dataset.v;
+
+  if(!first){
+    first=c;
+  } else {
+    second=c;
+    moves++;
+
+    if(first.dataset.v===second.dataset.v){
+      score+=SETTINGS.scoreMemoryMatch;
+      addScore("memoria", SETTINGS.scoreMemoryMatch);
+      first=second=null;
+    } else {
+      lock=true;
+      setTimeout(()=>{
+        first.innerText="?";
+        second.innerText="?";
+        first=second=null;
+        lock=false;
+      },500);
+    }
+
+    document.getElementById("moves").innerText=moves;
+    document.getElementById("score").innerText=score;
+  }
+}
+
+</script>
+
+
+</body></html>

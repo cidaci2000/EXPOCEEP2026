@@ -1,0 +1,285 @@
+/* CONFIGURAÇÕES GERAIS E VARIÁVEIS */
+:root {
+    --bg-primary: #121214;
+    --bg-secondary: #202024;
+    --bg-tertiary: #29292e;
+    --text-color: #e1e1e6;
+    --text-muted: #8d8d99;
+    --primary-color: #8257e6; /* Roxo Gamer Estilo Twitch/Discord */
+    --primary-hover: #9466ff;
+    --accent-color: #04d361; /* Verde para detalhes de sucesso/pontos */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* BARRA LATERAL */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    border-right: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 3rem;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.menu a {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.menu a:hover, .menu a.active {
+    background-color: var(--bg-tertiary);
+    color: var(--text-color);
+}
+
+.menu a.active {
+    border-left: 4px solid var(--primary-color);
+}
+
+.user-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--bg-tertiary);
+    border: 2px solid var(--primary-color);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.title {
+    font-size: 0.8rem;
+    color: var(--accent-color);
+}
+
+/* CONTEÚDO PRINCIPAL */
+.main-content {
+    flex-grow: 1;
+    padding: 2.5rem;
+    overflow-y: auto;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+}
+
+/* BOTÕES */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--bg-tertiary);
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-tertiary);
+}
+
+/* SEÇÃO DE JOGOS (GRID) */
+.games-section {
+    margin-bottom: 3.5rem;
+}
+
+.games-section h2, .ranking-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.game-card {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--bg-tertiary);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-image {
+    height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+    background: linear-gradient(135deg, #202024 0%, #29292e 100%);
+}
+
+.thumb-snake { border-bottom: 3px solid #04d361; }
+.thumb-quiz { border-bottom: 3px solid #00b0ff; }
+
+.game-details {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.game-details h3 {
+    font-size: 1.2rem;
+}
+
+.game-details p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    min-height: 50px;
+}
+
+.game-tags {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.game-tags span {
+    background-color: var(--bg-tertiary);
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-muted);
+}
+
+/* TABELA DE RANKING */
+.table-container {
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid var(--bg-tertiary);
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.ranking-table th, .ranking-table td {
+    padding: 1rem;
+}
+
+.ranking-table th {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    text-transform: uppercase;
+}
+
+.ranking-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ranking-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.ranking-table td {
+    font-size: 0.95rem;
+}
+
+.ranking-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* RESPONSIVIDADE PARA TELAS MENORES */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--bg-tertiary);
+        padding: 1.2rem;
+    }
+    .logo { margin-bottom: 1rem; }
+    .menu { flex-direction: row; justify-content: space-around; margin-bottom: 1rem;}
+    .user-avatar-section { display: none; } /* Oculta o avatar no topo mobile para poupar espaço */
+    .main-content { padding: 1.5rem; }
+}

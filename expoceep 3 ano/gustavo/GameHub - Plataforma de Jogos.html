@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)https://pagnogustavo-droid.github.io/Interface-De-Jogos/ -->
+<html lang="pt"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub - Plataforma de Jogos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 { margin: 0; font-size: 2.5em; }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        button {
+            padding: 12px 20px;
+            margin: 5px;
+            background: #00cc00;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #00ff00; }
+        input {
+            padding: 10px;
+            margin: 8px 0;
+            width: 280px;
+            border-radius: 8px;
+            border: none;
+        }
+        .game-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            width: 220px;
+            display: inline-block;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+        }
+        th { background: #00cc00; color: black; }
+        canvas { background: #000; border: 3px solid #00cc00; }
+        .memory-card {
+            width: 70px;
+            height: 70px;
+            background: #ddd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 GameHub</h1>
+            <p>Plataforma de Jogos Educacional</p>
+        </header>
+
+        <!-- AUTH SECTION -->
+        <div id="auth-section">
+            <h2>Entrar ou Cadastrar</h2>
+            
+            <div id="login-form">
+                <h3>Login</h3>
+                <input type="email" id="login-email" placeholder="Email" value="aluno@teste.com"><br>
+                <input type="password" id="login-password" placeholder="Senha" value="123456"><br>
+                <button onclick="login()">Entrar</button>
+                <p>Não tem conta? <a href="https://pagnogustavo-droid.github.io/Interface-De-Jogos/#" onclick="showRegister()" style="color:#00ff00">Cadastrar</a></p>
+            </div>
+
+            <div id="register-form" class="hidden">
+                <h3>Cadastro</h3>
+                <input type="text" id="reg-nome" placeholder="Seu nome"><br>
+                <input type="email" id="reg-email" placeholder="Email"><br>
+                <input type="password" id="reg-senha" placeholder="Senha"><br>
+                <button onclick="register()">Cadastrar</button>
+                <p>Já tem conta? <a href="https://pagnogustavo-droid.github.io/Interface-De-Jogos/#" onclick="showLogin()" style="color:#00ff00">Login</a></p>
+            </div>
+        </div>
+
+        <!-- MAIN APP -->
+        <div id="app-section" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Bem-vindo, <span id="username-display"></span>!</h2>
+                <button onclick="logout()">Sair</button>
+            </div>
+
+            <button onclick="showHome()">🏠 Home</button>
+            <button onclick="showRankingAll()">🏆 Ver Ranking Geral</button>
+
+            <div id="home-screen">
+                <h3>Jogos Disponíveis</h3>
+                <div id="games-list" style="display:flex; flex-wrap:wrap;"></div>
+
+                <h3>Seu Histórico de Pontuações</h3>
+                <div id="history"></div>
+            </div>
+
+            <!-- GAME SCREEN -->
+            <div id="game-screen" class="hidden">
+                <button onclick="backToHome()">← Voltar</button>
+                <h3 id="current-game-title"></h3>
+                <div id="game-area"></div>
+            </div>
+
+            <!-- RANKING SCREEN -->
+            <div id="ranking-screen" class="hidden">
+                <button onclick="backToHome()">← Voltar</button>
+                <h3 id="ranking-title"></h3>
+                <table id="ranking-table">
+                    <thead><tr><th>Posição</th><th>Jogador</th><th>Pontos</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DADOS (localStorage) ====================
+        let currentUser = null;
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('users')) || [];
+        }
+        function getScores() {
+            return JSON.parse(localStorage.getItem('scores')) || [];
+        }
+        function saveScore(userId, gameId, score, gameName) {
+            const scores = getScores();
+            scores.push({
+                id: Date.now(),
+                userId: userId,
+                gameId: gameId,
+                gameName: gameName,
+                score: score,
+                date: new Date().toLocaleString('pt-BR')
+            });
+            localStorage.setItem('scores', JSON.stringify(scores));
+        }
+
+        // ==================== AUTENTICAÇÃO ====================
+        function register() {
+            const nome = document.getElementById('reg-nome').value;
+            const email = document.getElementById('reg-email').value;
+            const senha = document.getElementById('reg-senha').value;
+
+            if (!nome || !email || !senha) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            const users = getUsers();
+            if (users.find(u => u.email === email)) {
+                alert("Email já cadastrado!");
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                nome: nome,
+                email: email,
+                senha: senha
+            };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            alert("Cadastro realizado com sucesso! Faça login.");
+            showLogin();
+        }
+
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-password').value;
+
+            const users = getUsers();
+            const user = users.find(u => u.email === email && u.senha === senha);
+
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                document.getElementById('username-display').textContent = user.nome;
+                loadGames();
+                loadHistory();
+            } else {
+                alert("Email ou senha incorretos!");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app-section').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+        }
+
+        // ==================== JOGOS ====================
+        function loadGames() {
+            const container = document.getElementById('games-list');
+            container.innerHTML = `
+                <div class="game-card">
+                    <h3>🐍 Cobrinha</h3>
+                    <p>Clássico jogo da cobrinha</p>
+                    <button onclick="startGame(1, 'Cobrinha')">Jogar</button>
+                    <button onclick="showGameRanking(1, 'Cobrinha')">Ranking</button>
+                </div>
+                <div class="game-card">
+                    <h3>🧠 Memória</h3>
+                    <p>Jogo da memória com emojis</p>
+                    <button onclick="startGame(2, 'Memória')">Jogar</button>
+                    <button onclick="showGameRanking(2, 'Memória')">Ranking</button>
+                </div>
+            `;
+        }
+
+        function startGame(gameId, gameName) {
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('current-game-title').textContent = gameName;
+
+            const area = document.getElementById('game-area');
+            area.innerHTML = '';
+
+            if (gameId === 1) {
+                // Snake Game
+                area.innerHTML = `
+                    <canvas id="snake" width="400" height="400"></canvas>
+                    <p>Pontuação: <strong id="snake-points">0</strong></p>
+                    <button onclick="startSnakeGame()">Iniciar Jogo</button>
+                `;
+                setTimeout(() => initSnake(), 100);
+            } else {
+                // Memory Game
+                initMemoryGame(area);
+            }
+        }
+
+        function backToHome() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
+            document.getElementById('home-screen').classList.remove('hidden');
+            loadHistory();
+        }
+
+        // ==================== COBRINHA ====================
+        let snakeInterval;
+        function initSnake() {
+            const canvas = document.getElementById('snake');
+            const ctx = canvas.getContext('2d');
+            let snake = [{x: 10, y: 10}];
+            let food = {x: 15, y: 15};
+            let score = 0;
+            let dx = 1, dy = 0;
+
+            function gameLoop() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+                // Colisão com parede
+                if (head.x < 0 || head.x >= 40 || head.y < 0 || head.y >= 40) {
+                    endSnakeGame(score);
+                    return;
+                }
+
+                // Colisão com corpo
+                for (let part of snake) {
+                    if (part.x === head.x && part.y === head.y) {
+                        endSnakeGame(score);
+                        return;
+                    }
+                }
+
+                snake.unshift(head);
+
+                if (head.x === food.x && head.y === food.y) {
+                    score += 10;
+                    document.getElementById('snake-points').textContent = score;
+                    food = {x: Math.floor(Math.random()*40), y: Math.floor(Math.random()*40)};
+                } else {
+                    snake.pop();
+                }
+
+                // Desenhar
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, 400, 400);
+                ctx.fillStyle = 'lime';
+                snake.forEach(s => ctx.fillRect(s.x*10, s.y*10, 10, 10));
+                ctx.fillStyle = 'red';
+                ctx.fillRect(food.x*10, food.y*10, 10, 10);
+            }
+
+            function changeDir(e) {
+                if (e.key === 'ArrowUp' && dy !== 1) { dx=0; dy=-1; }
+                if (e.key === 'ArrowDown' && dy !== -1) { dx=0; dy=1; }
+                if (e.key === 'ArrowLeft' && dx !== 1) { dx=-1; dy=0; }
+                if (e.key === 'ArrowRight' && dx !== -1) { dx=1; dy=0; }
+            }
+
+            document.addEventListener('keydown', changeDir);
+            snakeInterval = setInterval(() => gameLoop(), 120);
+
+            window.startSnakeGame = () => {
+                clearInterval(snakeInterval);
+                initSnake();
+            };
+
+            window.endSnakeGame = (finalScore) => {
+                clearInterval(snakeInterval);
+                alert(`Fim de jogo! Pontuação: ${finalScore}`);
+                saveScore(currentUser.id, 1, finalScore, 'Cobrinha');
+                backToHome();
+            };
+        }
+
+        // ==================== MEMÓRIA ====================
+        function initMemoryGame(container) {
+            const emojis = ['🍎','🍌','🍒','🍇','🍉','🍓','🥝','🍊'];
+            let cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            let flipped = [];
+            let matched = 0;
+            let score = 0;
+
+            container.innerHTML = `<div id="memory-grid" style="display:grid; grid-template-columns:repeat(4,80px); gap:10px; justify-content:center;"></div>
+                                  <p>Pontos: <strong id="mem-score">0</strong></p>`;
+
+            const grid = document.getElementById('memory-grid');
+
+            cards.forEach((emoji, i) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.textContent = '❓';
+                card.onclick = () => {
+                    if (flipped.length >= 2 || card.textContent !== '❓') return;
+                    card.textContent = emoji;
+                    flipped.push({card, emoji, index: i});
+
+                    if (flipped.length === 2) {
+                        setTimeout(() => {
+                            if (flipped[0].emoji === flipped[1].emoji) {
+                                matched += 2;
+                                score += 20;
+                                document.getElementById('mem-score').textContent = score;
+                                if (matched === cards.length) {
+                                    alert(`Parabéns! Você completou o jogo com ${score} pontos!`);
+                                    saveScore(currentUser.id, 2, score, 'Memória');
+                                    backToHome();
+                                }
+                            } else {
+                                flipped[0].card.textContent = '❓';
+                                flipped[1].card.textContent = '❓';
+                            }
+                            flipped = [];
+                        }, 800);
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        // ==================== RANKING ====================
+        function showGameRanking(gameId, gameName) {
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.remove('hidden');
+            document.getElementById('ranking-title').textContent = `Ranking - ${gameName}`;
+
+            const tbody = document.querySelector('#ranking-table tbody');
+            tbody.innerHTML = '';
+
+            const scores = getScores()
+                .filter(s => s.gameId === gameId)
+                .sort((a,b) => b.score - a.score)
+                .slice(0, 10);
+
+            scores.forEach((s, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${i+1}</td><td>${s.gameName === 'Cobrinha' ? '🐍' : '🧠'} ${getUserName(s.userId)}</td><td>${s.score}</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showRankingAll() {
+            alert("Ranking Geral em desenvolvimento.\n\nJogue mais para aparecer no ranking!");
+        }
+
+        function getUserName(userId) {
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            return user ? user.nome : 'Jogador';
+        }
+
+        function loadHistory() {
+            const container = document.getElementById('history');
+            const scores = getScores().filter(s => s.userId === currentUser.id)
+                .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            let html = '<ul>';
+            scores.forEach(s => {
+                html += `<li>${s.gameName} - ${s.score} pontos (${s.date})</li>`;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        function showHome() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('ranking-screen').classList.add('hidden');
+            document.getElementById('home-screen').classList.remove('hidden');
+        }
+
+        // Iniciar com formulário de login visível
+        window.onload = () => {
+            showLogin();
+        };
+    </script>
+
+</body></html>

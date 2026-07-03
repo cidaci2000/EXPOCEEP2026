@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)file:///C:/Users/apare/Downloads/index.html.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroArcade - Plataforma de Jogos</title>
+    <style>
+        :root {
+            --primary: #6200ea;
+            --primary-hover: #3700b3;
+            --background: #121212;
+            --surface: #1e1e1e;
+            --text: #ffffff;
+            --text-secondary: #aaaaaa;
+            --accent: #03dac6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navegação */
+        header {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid var(--accent);
+        }
+
+        /* Telas (Gerenciamento de Visibilidade) */
+        .screen {
+            display: none;
+            padding: 2rem;
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Catálogo de Jogos (Home) */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .game-card {
+            background: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(98, 0, 234, 0.3);
+        }
+
+        .game-cover {
+            height: 150px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .game-info {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .game-info h3 { margin-bottom: 0.5rem; }
+        .game-info p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+
+        /* Área do Jogo */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-btn {
+            background: #333;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .game-arena {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 400px;
+            justify-content: center;
+            border: 2px solid #333;
+        }
+
+        /* MECÂNICAS DOS JOGOS */
+        /* Jogo 1: Clique */
+        .click-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff007f, #aa0055);
+            border: 5px solid white;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.5);
+            transition: transform 0.05s;
+        }
+        .click-btn:active { transform: scale(0.95); }
+
+        /* Jogo 2: Memória */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 10px;
+        }
+        .memory-card {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            user-select: none;
+            color: transparent;
+        }
+        .memory-card.flipped {
+            background: #fff;
+            color: #000;
+        }
+        .memory-card.matched {
+            background: var(--accent);
+            color: #fff;
+            visibility: visible;
+        }
+
+        /* Rankings e Conquistas */
+        .dashboard-section {
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-section { grid-template-columns: 1fr; }
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: var(--surface);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .data-table th { background-color: #252525; color: var(--accent); }
+
+        .trophy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .trophy-item {
+            background: var(--surface);
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 4px solid #555;
+        }
+
+        .trophy-item.unlocked {
+            border-left-color: gold;
+        }
+
+        .trophy-icon { font-size: 1.5rem; }
+        .trophy-info h4 { font-size: 0.95rem; }
+        .trophy-info p { font-size: 0.8rem; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="logo">🎮 RetroArcade</div>
+        <div class="nav-user">
+            <div class="avatar">🕹️</div>
+            <span>Jogador Convidado</span>
+        </div>
+    </header>
+
+    <div id="screen-home" class="screen active">
+        <h2>Catálogo de Jogos</h2>
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-cover">⚡</div>
+                <div class="game-info">
+                    <h3>Velocidade do Clique</h3>
+                    <p>Regras: Clique no botão o máximo de vezes que conseguir antes que o tempo de 10 segundos acabe!</p>
+                    <button class="btn-primary" onclick="loadGame(&#39;clicker&#39;)">Jogar Agora</button>
+                </div>
+            </div>
+            <div class="game-card">
+                <div class="game-cover">🧠</div>
+                <div class="game-info">
+                    <h3>Jogo da Memória</h3>
+                    <p>Regras: Encontre os pares de emojis iguais. Quanto menos segundos você demorar, melhor será sua pontuação!</p>
+                    <button class="btn-primary" onclick="loadGame(&#39;memory&#39;)">Jogar Agora</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div>
+                <h3>🏆 Melhores Pontuações Recentes</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Jogo</th>
+                            <th>Score</th>
+                            <th>Data/Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body"><tr><td colspan="4" style="text-align:center; color:gray;">Nenhuma partida registrada ainda.</td></tr></tbody>
+                </table>
+            </div>
+
+            <div>
+                <h3>🏅 Suas Conquistas</h3>
+                <div class="trophy-list" id="trophies-container"><div class="trophy-item ">
+                    <div class="trophy-icon">🔒</div>
+                    <div class="trophy-info">
+                        <h4>Primeiros Passos</h4>
+                        <p>Termine qualquer jogo pela primeira vez.</p>
+                    </div>
+                </div><div class="trophy-item ">
+                    <div class="trophy-icon">🔒</div>
+                    <div class="trophy-info">
+                        <h4>Dedo Nervoso</h4>
+                        <p>Consiga mais de 40 cliques no jogo do clique.</p>
+                    </div>
+                </div><div class="trophy-item ">
+                    <div class="trophy-icon">🔒</div>
+                    <div class="trophy-info">
+                        <h4>Mente Brilhante</h4>
+                        <p>Complete o jogo da memória fazendo mais de 120 pontos.</p>
+                    </div>
+                </div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="game-header">
+            <button class="back-btn" onclick="navigateTo(&#39;home&#39;)">← Voltar ao Menu</button>
+            <h2 id="current-game-title">Nome do Jogo</h2>
+            <div id="game-live-status" style="font-weight: bold; color: var(--accent);"></div>
+        </div>
+        
+        <div class="game-arena" id="arena-content">
+            </div>
+    </div>
+
+    <script>
+        // --- ARMAZENAMENTO LOCAL (SIMULAÇÃO BACK-END) ---
+        if(!localStorage.getItem('pontuacoes')) localStorage.setItem('pontuacoes', JSON.stringify([]));
+
+        let gameTimer = null;
+        let gameScore = 0;
+
+        const conquistasDefinicoes = [
+            { id: 'first_game', title: 'Primeiros Passos', desc: 'Termine qualquer jogo pela primeira vez.', icon: '🏁' },
+            { id: 'click_master', title: 'Dedo Nervoso', desc: 'Consiga mais de 40 cliques no jogo do clique.', icon: '⚡' },
+            { id: 'memory_master', title: 'Mente Brilhante', desc: 'Complete o jogo da memória fazendo mais de 120 pontos.', icon: '🧠' }
+        ];
+
+        // Inicializa a interface
+        updateDashboard();
+
+        // --- SISTEMA DE ROTAS / NAVEGAÇÃO ---
+        function navigateTo(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${screenId}`).classList.add('active');
+            
+            if(screenId === 'home') {
+                updateDashboard();
+            }
+            clearInterval(gameTimer);
+        }
+
+        // --- ATUALIZAÇÃO DO DASHBOARD ---
+        function updateDashboard() {
+            const scores = JSON.parse(localStorage.getItem('pontuacoes'));
+            
+            // Ordena decrescente por score
+            scores.sort((a, b) => b.score - a.score);
+            
+            const rankingBody = document.getElementById('ranking-body');
+            rankingBody.innerHTML = '';
+
+            if (scores.length === 0) {
+                rankingBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:gray;">Nenhuma partida registrada ainda.</td></tr>`;
+            } else {
+                scores.slice(0, 5).forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}º</td>
+                        <td>${item.game === 'clicker' ? '⚡ Clique' : '🧠 Memória'}</td>
+                        <td><strong>${item.score}</strong></td>
+                        <td style="font-size:0.85rem; color:gray;">${item.date}</td>
+                    `;
+                    rankingBody.appendChild(tr);
+                });
+            }
+
+            // Atualizar Conquistas
+            const trophiesContainer = document.getElementById('trophies-container');
+            trophiesContainer.innerHTML = '';
+
+            conquistasDefinicoes.forEach(def => {
+                let unlocked = false;
+                if(def.id === 'first_game' && scores.length > 0) unlocked = true;
+                if(def.id === 'click_master' && scores.some(s => s.game === 'clicker' && s.score >= 40)) unlocked = true;
+                if(def.id === 'memory_master' && scores.some(s => s.game === 'memory' && s.score >= 120)) unlocked = true;
+
+                const div = document.createElement('div');
+                div.className = `trophy-item ${unlocked ? 'unlocked' : ''}`;
+                div.innerHTML = `
+                    <div class="trophy-icon">${unlocked ? def.icon : '🔒'}</div>
+                    <div class="trophy-info">
+                        <h4>${def.title}</h4>
+                        <p>${def.desc}</p>
+                    </div>
+                `;
+                trophiesContainer.appendChild(div);
+            });
+        }
+
+        // --- SALVAR PONTUAÇÃO ---
+        function saveScore(gameKey, finalScore) {
+            let scores = JSON.parse(localStorage.getItem('pontuacoes'));
+            scores.push({
+                id: Date.now().toString(),
+                game: gameKey,
+                score: finalScore,
+                date: new Date().toLocaleString('pt-BR')
+            });
+            localStorage.setItem('pontuacoes', JSON.stringify(scores));
+            alert(`Fim de jogo! Sua pontuação: ${finalScore} pontos salvos.`);
+            navigateTo('home');
+        }
+
+        // --- LÓGICA DOS JOGOS ---
+        function loadGame(gameKey) {
+            const arena = document.getElementById('arena-content');
+            const title = document.getElementById('current-game-title');
+            const status = document.getElementById('game-live-status');
+            
+            arena.innerHTML = '';
+            status.innerText = '';
+            navigateTo('game');
+
+            if(gameKey === 'clicker') {
+                title.innerText = "Velocidade do Clique";
+                gameScore = 0;
+                let timeLeft = 10;
+                status.innerText = `Tempo: ${timeLeft}s | Cliques: ${gameScore}`;
+
+                const button = document.createElement('button');
+                button.className = 'click-btn';
+                button.innerText = 'CLIQUE!';
+                button.onclick = () => {
+                    gameScore++;
+                    status.innerText = `Tempo: ${timeLeft}s | Cliques: ${gameScore}`;
+                };
+                arena.appendChild(button);
+
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    status.innerText = `Tempo: ${timeLeft}s | Cliques: ${gameScore}`;
+                    if(timeLeft <= 0) {
+                        clearInterval(gameTimer);
+                        saveScore('clicker', gameScore);
+                    }
+                }, 1000);
+
+            } else if(gameKey === 'memory') {
+                title.innerText = "Jogo da Memória";
+                status.innerText = "Encontre os pares rapidamente!";
+                
+                const emojis = ['🍎', '🍎', '🍌', '🍌', '🥑', '🥑', '🐱', '🐱', '🤖', '🤖', '👻', '👻'];
+                emojis.sort(() => Math.random() - 0.5);
+
+                const grid = document.createElement('div');
+                grid.className = 'memory-grid';
+
+                let flippedCards = [];
+                let matchedPairs = 0;
+                let startTime = Date.now();
+
+                emojis.forEach((emoji, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-card';
+                    card.dataset.emoji = emoji;
+                    card.innerText = emoji;
+
+                    card.onclick = () => {
+                        if(card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) return;
+
+                        card.classList.add('flipped');
+                        flippedCards.push(card);
+
+                        if(flippedCards.length === 2) {
+                            if(flippedCards[0].dataset.emoji === flippedCards[1].dataset.emoji) {
+                                flippedCards[0].classList.add('matched');
+                                flippedCards[1].classList.add('matched');
+                                flippedCards = [];
+                                matchedPairs++;
+
+                                if(matchedPairs === emojis.length / 2) {
+                                    let timeSpent = Math.floor((Date.now() - startTime) / 1000);
+                                    let calculatedScore = Math.max(10, 200 - (timeSpent * 5)); 
+                                    setTimeout(() => saveScore('memory', calculatedScore), 500);
+                                }
+                            } else {
+                                setTimeout(() => {
+                                    flippedCards[0].classList.remove('flipped');
+                                    flippedCards[1].classList.remove('flipped');
+                                    flippedCards = [];
+                                }, 800);
+                            }
+                        }
+                    };
+                    grid.appendChild(card);
+                });
+                arena.appendChild(grid);
+            }
+        }
+    </script>
+
+</body></html>

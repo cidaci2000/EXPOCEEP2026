@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)https://mimi-bloood.github.io/TRABALHO-DA-GE/ -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakura Mini Arcade</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#fff, #ffd6e7);
+  overflow:hidden;
+  color:#7a3f5a;
+  text-align:center;
+}
+
+h1{ margin-top:20px; }
+
+.screen{ display:none; padding:20px; }
+.screen.active{ display:block; }
+
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:20px;
+  background:#f8b8d8;
+  cursor:pointer;
+  margin:5px;
+}
+
+.card{
+  width:60px;
+  height:60px;
+  background:white;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  font-size:24px;
+  margin:5px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.flower{
+  font-size:40px;
+  cursor:pointer;
+}
+
+#petals{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+}
+
+.petal{
+  position:absolute;
+  top:-20px;
+  font-size:18px;
+  animation: fall linear forwards;
+}
+
+@keyframes fall{
+  to{
+    transform: translateY(110vh);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="petals"><div class="petal" style="left: 78.6542vw; animation-duration: 4.02115s;">🌸</div><div class="petal" style="left: 25.2908vw; animation-duration: 3.35054s;">🌸</div><div class="petal" style="left: 4.08627vw; animation-duration: 4.94747s;">🌸</div><div class="petal" style="left: 23.0305vw; animation-duration: 7.55841s;">🌸</div><div class="petal" style="left: 71.4462vw; animation-duration: 6.60639s;">🌸</div><div class="petal" style="left: 74.9742vw; animation-duration: 6.30359s;">🌸</div><div class="petal" style="left: 64.3585vw; animation-duration: 7.34692s;">🌸</div><div class="petal" style="left: 29.059vw; animation-duration: 4.79109s;">🌸</div><div class="petal" style="left: 3.96811vw; animation-duration: 4.73769s;">🌸</div><div class="petal" style="left: 84.5386vw; animation-duration: 4.9396s;">🌸</div><div class="petal" style="left: 42.36vw; animation-duration: 4.9165s;">🌸</div><div class="petal" style="left: 23.8482vw; animation-duration: 4.24225s;">🌸</div></div>
+
+<!-- MENU -->
+<div class="screen active" id="menu">
+  <h1>🌸 Sakura Mini Arcade 🌸</h1>
+  <button onclick="startMemory()">Jogo da Memória</button>
+  <button onclick="startFlower()">Pegue a Flor</button>
+</div>
+
+<!-- MEMORY -->
+<div class="screen" id="memory">
+  <h2>🃏 Memória Sakura</h2>
+  <div id="board"></div>
+  <p id="moves">Movimentos: 0</p>
+  <button onclick="backMenu()">Voltar</button>
+</div>
+
+<!-- FLOWER -->
+<div class="screen" id="flowerGame">
+  <h2>🌸 Pegue a Flor</h2>
+  <div class="flower" id="flower">🌸</div>
+  <p>Pontuação: <span id="score">0</span></p>
+  <button onclick="backMenu()">Voltar</button>
+</div>
+
+<script>
+// PETALAS
+function createPetals(){
+  const container = document.getElementById("petals");
+  for(let i=0;i<12;i++){
+    const p = document.createElement("div");
+    p.className="petal";
+    p.textContent="🌸";
+    p.style.left=Math.random()*100+"vw";
+    p.style.animationDuration=(3+Math.random()*5)+"s";
+    container.appendChild(p);
+  }
+}
+createPetals();
+
+// MENU
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// VOLTAR
+function backMenu(){
+  show("menu");
+}
+
+// ================= MEMORY GAME =================
+let cards = ["🌸","🌸","🌷","🌷","🌺","🌺","💮","💮"];
+let selected = [];
+let moves = 0;
+
+function startMemory(){
+  show("memory");
+  const board = document.getElementById("board");
+  board.innerHTML="";
+  moves=0;
+  document.getElementById("moves").textContent="Movimentos: 0";
+
+  cards.sort(()=>0.5-Math.random());
+
+  cards.forEach(symbol=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.textContent="❓";
+    c.dataset.symbol=symbol;
+
+    c.onclick=()=>{
+      if(c.classList.contains("done")||selected.includes(c)) return;
+
+      c.textContent=symbol;
+      selected.push(c);
+
+      if(selected.length===2){
+        moves++;
+        document.getElementById("moves").textContent="Movimentos: "+moves;
+
+        if(selected[0].dataset.symbol===selected[1].dataset.symbol){
+          selected.forEach(x=>x.classList.add("done"));
+          selected=[];
+        }else{
+          setTimeout(()=>{
+            selected.forEach(x=>x.textContent="❓");
+            selected=[];
+          },600);
+        }
+      }
+    };
+
+    board.appendChild(c);
+  });
+}
+
+// ================= FLOWER GAME =================
+let score=0;
+function startFlower(){
+  show("flowerGame");
+  score=0;
+  document.getElementById("score").textContent=score;
+}
+
+document.getElementById("flower").onclick=()=>{
+  score++;
+  document.getElementById("score").textContent=score;
+
+  const f=document.getElementById("flower");
+  f.style.transform="scale(1.2)";
+  setTimeout(()=>f.style.transform="scale(1)",150);
+
+  f.style.position="absolute";
+  f.style.left=Math.random()*80+"vw";
+  f.style.top=Math.random()*60+"vh";
+};
+</script>
+
+
+</body></html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///C:/Users/apare/Downloads/index%20(1).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Retro - Central de Jogos</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-main);
+            text-align: center;
+            margin: 0;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #111827, var(--bg-secondary));
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .menu {
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            max-width: 600px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background: var(--accent);
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background: #ec4899;
+        }
+
+        .game-container {
+            background: var(--bg-secondary);
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        canvas {
+            background: #111;
+            border: 4px solid #334155;
+            border-radius: 10px;
+            max-width: 100%;
+        }
+
+        /* JOGO DA VELHA CUSTOMIZADO */
+        #grid-velha {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .quadrado {
+            width: 100px;
+            height: 100px;
+            background: #334155;
+            color: white;
+            font-size: 45px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .quadrado:hover {
+            background: #475569;
+        }
+
+        .status-txt {
+            font-size: 20px;
+            margin: 15px;
+            font-weight: 500;
+        }
+
+        .btn-reset {
+            background: #10b981;
+        }
+        .btn-reset:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🕹️ Arena de Mini-Jogos</h1>
+</header>
+
+<div class="menu">
+    <button onclick="alternarAba(&#39;aba-cobra&#39;)" id="btn-aba-cobra" class="active">🐍 Cobra</button>
+    <button onclick="alternarAba(&#39;aba-dino&#39;)" id="btn-aba-dino">🦖 Dino</button>
+    <button onclick="alternarAba(&#39;aba-velha&#39;)" id="btn-aba-velha">❌ Jogo da Velha</button>
+</div>
+
+<div id="aba-cobra" class="game-container active">
+    <h2>🐍 Jogo da Cobra</h2>
+    <canvas id="canvasCobra" width="400" height="400"></canvas>
+</div>
+
+<div id="aba-dino" class="game-container">
+    <h2>🦖 Corredor Dino</h2>
+    <p>Aperte <kbd>ESPAÇO</kbd> ou toque para pular</p>
+    <canvas id="canvasDino" width="600" height="200"></canvas>
+</div>
+
+<div id="aba-velha" class="game-container">
+    <h2>❌⭕ Jogo da Velha</h2>
+    <div id="grid-velha"><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div><div class="quadrado"></div></div>
+    <p id="info-status" class="status-txt" style="color: rgb(255, 255, 255);">Turno do Jogador: X</p>
+    <button class="btn-reset" onclick="reiniciarVelha()">Novo Jogo</button>
+</div>
+
+<script>
+// ==========================================
+// GERENCIADOR DE ABAS
+// ==========================================
+function alternarAba(idAba) {
+    document.querySelectorAll('.game-container').forEach(container => container.classList.remove('active'));
+    document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+    
+    document.getElementById(idAba).classList.add('active');
+    document.getElementById('btn-' + idAba).classList.add('active');
+}
+// Inicializa abrindo o primeiro jogo
+alternarAba('aba-cobra');
+
+
+// ==========================================
+// JOGO DA COBRA
+// ==========================================
+const canvasCobra = document.getElementById("canvasCobra");
+const ctxCobra = canvasCobra.getContext("2d");
+
+let corpoCobra = [{x: 200, y: 200}];
+let maca = {x: 100, y: 100};
+let velX = 20, velY = 0;
+let proximaDirecao = {x: 20, y: 0};
+
+document.addEventListener("keydown", e => {
+    // Evita que a cobra volte por dentro de si mesma
+    if(e.key === "ArrowUp" && velY === 0) proximaDirecao = {x: 0, y: -20};
+    if(e.key === "ArrowDown" && velY === 0) proximaDirecao = {x: 0, y: 20};
+    if(e.key === "ArrowLeft" && velX === 0) proximaDirecao = {x: -20, y: 0};
+    if(e.key === "ArrowRight" && velX === 0) proximaDirecao = {x: 20, y: 0};
+});
+
+function loopCobra() {
+    velX = proximaDirecao.x;
+    velY = proximaDirecao.y;
+
+    ctxCobra.clearRect(0, 0, 400, 400);
+    
+    const novaCabeca = { x: corpoCobra[0].x + velX, y: corpoCobra[0].y + velY };
+    corpoCobra.unshift(novaCabeca);
+
+    if(novaCabeca.x === maca.x && novaCabeca.y === maca.y) {
+        maca = {
+            x: Math.floor(Math.random() * 20) * 20,
+            y: Math.floor(Math.random() * 20) * 20
+        };
+    } else {
+        corpoCobra.pop();
+    }
+
+    // Colisões com paredes ou com o próprio corpo
+    const colidiuParede = novaCabeca.x < 0 || novaCabeca.y < 0 || novaCabeca.x >= 400 || novaCabeca.y >= 400;
+    const colidiuCorpo = corpoCobra.slice(1).some(parte => parte.x === novaCabeca.x && parte.y === novaCabeca.y);
+
+    if(colidiuParede || colidiuCorpo) {
+        corpoCobra = [{x: 200, y: 200}];
+        proximaDirecao = {x: 20, y: 0};
+    }
+
+    // Desenhar Maçã (Vermelha)
+    ctxCobra.fillStyle = "#ef4444";
+    ctxCobra.fillRect(maca.x, maca.y, 18, 18);
+
+    // Desenhar Cobra (Neon Verde)
+    ctxCobra.fillStyle = "#10b981";
+    corpoCobra.forEach(p => ctxCobra.fillRect(p.x, p.y, 18, 18));
+}
+setInterval(loopCobra, 120);
+
+
+// ==========================================
+// JOGO DO DINOSSAURO
+// ==========================================
+const canvasDino = document.getElementById("canvasDino");
+const ctxDino = canvasDino.getContext("2d");
+
+let playerDino = { x: 50, y: 140, w: 30, h: 40, vY: 0, pulando: false };
+let gravidadeDino = 0.8;
+let velocidadeJogo = 6;
+let pontuacaoDino = 0;
+let fimDeJogoDino = false;
+let listaObstaculos = [];
+
+function gerarObstaculo() {
+    if(fimDeJogoDino) return;
+    listaObstaculos.push({
+        x: 650,
+        w: 20,
+        h: Math.random() > 0.5 ? 35 : 55
+    });
+    setTimeout(gerarObstaculo, 1000 + Math.random() * 1200);
+}
+gerarObstaculo();
+
+document.addEventListener("keydown", e => {
+    if(e.code === "Space") {
+        if(fimDeJogoDino) {
+            reiniciarDino();
+            return;
+        }
+        if(!playerDino.pulando) {
+            playerDino.vY = -13;
+            playerDino.pulando = true;
+        }
+    }
+});
+
+function reiniciarDino() {
+    listaObstaculos = [];
+    pontuacaoDino = 0;
+    velocidadeJogo = 6;
+    fimDeJogoDino = false;
+    playerDino.y = 140;
+    playerDino.vY = 0;
+    playerDino.pulando = false;
+    gerarObstaculo();
+}
+
+function loopDino() {
+    // Lógica física
+    playerDino.vY += gravidadeDino;
+    playerDino.y += playerDino.vY;
+
+    if(playerDino.y >= 140) {
+        playerDino.y = 140;
+        playerDino.vY = 0;
+        playerDino.pulando = false;
+    }
+
+    listaObstaculos.forEach(obs => obs.x -= velocidadeJogo);
+    listaObstaculos = listaObstaculos.filter(obs => obs.x + obs.w > 0);
+
+    // Checagem de colisões
+    for(let obs of listaObstaculos) {
+        if(playerDino.x < obs.x + obs.w &&
+           playerDino.x + playerDino.w > obs.x &&
+           playerDino.y + playerDino.h > 180 - obs.h) {
+            fimDeJogoDino = true;
+        }
+    }
+
+    if(!fimDeJogoDino) {
+        pontuacaoDino += 0.1;
+        velocidadeJogo += 0.001;
+    }
+
+    // Renderização gráfica
+    ctxDino.clearRect(0,0,600,200);
+    
+    // Chão plano limpo
+    ctxDino.fillStyle = "#475569";
+    ctxDino.fillRect(0, 180, 600, 4);
+
+    // Obstáculos (Obstáculos Roxos)
+    ctxDino.fillStyle = "#a855f7";
+    listaObstaculos.forEach(obs => {
+        ctxDino.fillRect(obs.x, 180 - obs.h, obs.w, obs.h);
+    });
+
+    // Jogador Dino (Caixa Azul Ciano)
+    ctxDino.fillStyle = "#06b6d4";
+    ctxDino.fillRect(playerDino.x, playerDino.y, playerDino.w, playerDino.h);
+
+    // Texto de Pontos
+    ctxDino.fillStyle = "#fff";
+    ctxDino.font = "bold 16px sans-serif";
+    ctxDino.fillText("SCORE: " + Math.floor(pontuacaoDino), 480, 30);
+
+    if(fimDeJogoDino) {
+        ctxDino.fillStyle = "rgba(0,0,0,0.7)";
+        ctxDino.fillRect(0, 0, 600, 200);
+        ctxDino.fillStyle = "#ef4444";
+        ctxDino.font = "bold 30px sans-serif";
+        ctxDino.fillText("FIM DE JOGO", 210, 90);
+        ctxDino.fillStyle = "#fff";
+        ctxDino.font = "16px sans-serif";
+        ctxDino.fillText("Pressione ESPAÇO para reviver", 195, 130);
+    }
+
+    requestAnimationFrame(loopDino);
+}
+loopDino();
+
+
+// ==========================================
+// JOGO DA VELHA
+// ==========================================
+const gradeVelha = document.getElementById("grid-velha");
+const txtStatus = document.getElementById("info-status");
+let listaCasas = ["", "", "", "", "", "", "", "", ""];
+let jogadorAtual = "X";
+let jogoAtivo = true;
+
+function renderizarTabuleiro() {
+    gradeVelha.innerHTML = "";
+    listaCasas.forEach((valor, indice) => {
+        const quadrado = document.createElement("div");
+        quadrado.className = "quadrado";
+        quadrado.textContent = valor;
+        
+        // Estilização colorida dinâmica para as letras
+        if(valor === "X") quadrado.style.color = "#38bdf8";
+        if(valor === "O") quadrado.style.color = "#f43f5e";
+
+        quadrado.onclick = () => registrarJogada(indice);
+        gradeVelha.appendChild(quadrado);
+    });
+}
+
+function registrarJogada(indice) {
+    if(listaCasas[indice] !== "" || !jogoAtivo) return;
+
+    listaCasas[indice] = jogadorAtual;
+    
+    const combinacoesVitoria = [
+        [0,1,2], [3,4,5], [6,7,8], // Linhas
+        [0,3,6], [1,4,7], [2,5,8], // Colunas
+        [0,4,8], [2,4,6]           // Diagonais
+    ];
+
+    let alguemGanhou = false;
+
+    for(let combo of combinacoesVitoria) {
+        if(listaCasas[combo[0]] && 
+           listaCasas[combo[0]] === listaCasas[combo[1]] && 
+           listaCasas[combo[1]] === listaCasas[combo[2]]) {
+            alguemGanhou = true;
+            break;
+        }
+    }
+
+    if(alguemGanhou) {
+        txtStatus.textContent = `🎉 Jogador '${jogadorAtual}' é o vencedor!`;
+        txtStatus.style.color = "#10b981";
+        jogoAtivo = false;
+        renderizarTabuleiro();
+        return;
+    }
+
+    if(!listaCasas.includes("")) {
+        txtStatus.textContent = "Empate! Velha 👵";
+        txtStatus.style.color = "#94a3b8";
+        jogoAtivo = false;
+        renderizarTabuleiro();
+        return;
+    }
+
+    jogadorAtual = jogadorAtual === "X" ? "O" : "X";
+    txtStatus.textContent = `Turno do Jogador: ${jogadorAtual}`;
+    txtStatus.style.color = "#fff";
+    renderizarTabuleiro();
+}
+
+function reiniciarVelha() {
+    listaCasas = ["", "", "", "", "", "", "", "", ""];
+    jogadorAtual = "X";
+    jogoAtivo = true;
+    txtStatus.textContent = "Turno do Jogador: X";
+    txtStatus.style.color = "#fff";
+    renderizarTabuleiro();
+}
+reiniciarVelha();
+</script>
+
+
+</body></html>

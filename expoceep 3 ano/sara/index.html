@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub | Sua Plataforma de Jogos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-gamepad"></i> <span>GameHub</span>
+        </div>
+        <nav class="menu">
+            <a href="#" class="active"><i class="fa-solid fa-house"></i> Início</a>
+            <a href="#"><i class="fa-solid fa-trophy"></i> Rankings</a>
+            <a href="#"><i class="fa-solid fa-user"></i> Perfil</a>
+        </nav>
+        <div class="user-avatar-section">
+            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Gamer123" alt="Avatar do Usuário" class="avatar">
+            <div class="user-info">
+                <span class="username">Player_One</span>
+                <span class="title">🏆 Bronze IV</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="main-header">
+            <h1>Catálogo de Jogos</h1>
+            <div class="auth-buttons">
+                <button class="btn-secondary">Sair</button>
+            </div>
+        </header>
+
+        <section class="games-section">
+            <h2>Escolha seu Desafio</h2>
+            <div class="games-grid">
+                
+                <div class="game-card">
+                    <div class="game-image thumb-snake">🐍</div>
+                    <div class="game-details">
+                        <h3>Jogo da Cobrinha (Snake)</h3>
+                        <p>Coma as maçãs, cresça e evite bater nas paredes ou em si mesmo!</p>
+                        <div class="game-tags">
+                            <span>Clássico</span>
+                            <span>Arcade</span>
+                        </div>
+                        <button class="btn-primary">Jogar Agora</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="game-image thumb-quiz">🧠</div>
+                    <div class="game-details">
+                        <h3>Quiz Tech</h3>
+                        <p>Teste seus conhecimentos sobre programação e desenvolvimento web.</p>
+                        <div class="game-tags">
+                            <span>Intelecto</span>
+                            <span>Tempo</span>
+                        </div>
+                        <button class="btn-primary">Jogar Agora</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="ranking-section">
+            <h2><i class="fa-solid fa-crown"></i> Ranking Geral</h2>
+            <div class="table-container">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Jogador</th>
+                            <th>Jogo</th>
+                            <th>Pontuação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1º 🥇</td>
+                            <td>DevMaster</td>
+                            <td>Quiz Tech</td>
+                            <td>2.450 pts</td>
+                        </tr>
+                        <tr>
+                            <td>2º 🥈</td>
+                            <td>Player_One</td>
+                            <td>Snake</td>
+                            <td>1.890 pts</td>
+                        </tr>
+                        <tr>
+                            <td>3º 🥉</td>
+                            <td>CodeNinja</td>
+                            <td>Snake</td>
+                            <td>1.500 pts</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>

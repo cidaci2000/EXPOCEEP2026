@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///C:/Users/apare/Downloads/index%20(7).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPlay - Plataforma de Jogos</title>
+    <style>
+        /* --- ESTILOS GERAIS (RESET & CORES) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER & NAVEGAÇÃO --- */
+        header {
+            background-color: #1f2833;
+            border-bottom: 3px solid #45f3ff; /* Verde Neon / Ciano */
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            color: #45f3ff;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        header h1 span {
+            color: #ffffff;
+        }
+
+        .btn-voltar {
+            background-color: transparent;
+            color: #ffffff;
+            border: 2px solid #45f3ff;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: 0.3s;
+            display: none; /* Oculto inicialmente */
+        }
+
+        .btn-voltar:hover {
+            background-color: #45f3ff;
+            color: #0b0c10;
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- DASHBOARD / SELEÇÃO DE JOGOS --- */
+        .grid-jogos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card-jogo {
+            background-color: #1f2833;
+            border: 1px solid #2f3e46;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card-jogo:hover {
+            transform: translateY(-5px);
+            border-color: #45f3ff;
+            box-shadow: 0 0 15px rgba(69, 243, 255, 0.3);
+        }
+
+        .card-jogo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-jogo p {
+            color: #c5a880; /* Cor secundária ou cinza claro */
+            color: #a9b7c6;
+            font-size: 0.9rem;
+        }
+
+        /* --- TELAS DOS JOGOS (CONTAINERS) --- */
+        .tela-jogo {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            background-color: #1f2833;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid #45f3ff;
+        }
+
+        .tela-jogo h2 {
+            color: #45f3ff;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- ESTILOS ESPECÍFICOS: COBRINHA (SNAKE) --- */
+        #canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        canvas {
+            background-color: #0b0c10;
+            border: 2px solid #ffffff;
+        }
+
+        .placar {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .btn-action {
+            background-color: #45f3ff;
+            color: #0b0c10;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #39ccff;
+        }
+
+        /* Placeholder para os outros jogos */
+        .placeholder-jogo {
+            padding: 3rem;
+            border: 2px dashed #45f3ff;
+            color: #a9b7c6;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Green<span>Play</span></h1>
+        <button class="btn-voltar" id="btnVoltar" onclick="voltarAoMenu()">← Voltar ao Menu</button>
+    </header>
+
+    <main>
+        <div class="grid-jogos" id="menuPrincipal">
+            <div class="card-jogo" onclick="abrirJogo(&#39;uno&#39;)">
+                <h3>Uno</h3>
+                <p>Em breve: O clássico jogo de cartas.</p>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo(&#39;xadrez&#39;)">
+                <h3>Xadrez</h3>
+                <p>Em breve: Batalha de estratégia mental.</p>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo(&#39;cobrinha&#39;)">
+                <h3>Cobrinha</h3>
+                <p>Jogue Agora: O clássico arcade retro.</p>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo(&#39;batalha&#39;)">
+                <h3>Batalha Naval</h3>
+                <p>Em breve: Afunde a frota inimiga.</p>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo(&#39;campo&#39;)">
+                <h3>Campo Minado</h3>
+                <p>Em breve: Cuidado onde você clica.</p>
+            </div>
+        </div>
+
+        <div class="tela-jogo" id="jogo-uno">
+            <h2>Uno</h2>
+            <div class="placeholder-jogo">Área do jogo de Uno (Interface de Cartas em desenvolvimento)</div>
+        </div>
+
+        <div class="tela-jogo" id="jogo-xadrez">
+            <h2>Xadrez</h2>
+            <div class="placeholder-jogo">Área do Tabuleiro de Xadrez (Em desenvolvimento)</div>
+        </div>
+
+        <div class="tela-jogo" id="jogo-cobrinha">
+            <h2>Jogo da Cobrinha</h2>
+            <div id="canvas-container">
+                <div class="placar">Pontuação: <span id="pontos">0</span></div>
+                <canvas id="stage" width="400" height="400"></canvas>
+                <button class="btn-action" onclick="reiniciarCobrinha()">Iniciar / Reiniciar</button>
+            </div>
+        </div>
+
+        <div class="tela-jogo" id="jogo-batalha">
+            <h2>Batalha Naval</h2>
+            <div class="placeholder-jogo">Área da Grade de Batalha Naval (Em desenvolvimento)</div>
+        </div>
+
+        <div class="tela-jogo" id="jogo-campo">
+            <h2>Campo Minado</h2>
+            <div class="placeholder-jogo">Área do Tabuleiro de Campo Minado (Em desenvolvimento)</div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- SISTEMA DE NAVEGAÇÃO DA PLATAFORMA ---
+        const idsJogos = ['uno', 'xadrez', 'cobrinha', 'batalha', 'campo'];
+        
+        function abrirJogo(idJogo) {
+            // Esconde o menu
+            document.getElementById('menuPrincipal').style.display = 'none';
+            // Mostra o botão voltar
+            document.getElementById('btnVoltar').style.display = 'block';
+            // Mostra a tela do jogo escolhido
+            document.getElementById(`jogo-${idJogo}`).style.display = 'block';
+
+            // Inicialização específica se for o da cobrinha
+            if(idJogo === 'cobrinha') {
+                inicializarCobrinha();
+            }
+        }
+
+        function voltarAoMenu() {
+            // Para o loop da cobrinha se estiver ativo
+            if(snakeInterval) clearInterval(snakeInterval);
+
+            // Esconde todas as telas de jogos
+            idsJogos.forEach(id => {
+                document.getElementById(`jogo-${id}`).style.display = 'none';
+            });
+            // Esconde o botão voltar
+            document.getElementById('btnVoltar').style.display = 'none';
+            // Mostra o menu principal
+            document.getElementById('menuPrincipal').style.display = 'grid';
+        }
+
+
+        // --- LÓGICA DO JOGO DA COBRINHA (SNAKE) ---
+        let canvas, ctx;
+        let snakeInterval;
+        let vx = 0, vy = 0; // Velocidade/Direção
+        let px = 10, py = 10; // Posição inicial da cabeça
+        let tp = 20; // Tamanho de cada quadrado do grid (20x20)
+        let qp = 20; // Quantidade de quadrados (20 * 20 = 400px)
+        let ax = 15, ay = 15; // Posição inicial da maçã
+        let trail = [];
+        let tail = 5;
+        let pontos = 0;
+
+        function inicializarCobrinha() {
+            canvas = document.getElementById('stage');
+            ctx = canvas.getContext('2d');
+            document.addEventListener("keydown", oPressionarTeclado);
+            reiniciarCobrinha();
+        }
+
+        function reiniciarCobrinha() {
+            if(snakeInterval) clearInterval(snakeInterval);
+            px = 10; py = 10;
+            vx = 1; vy = 0; // Começa andando para a direita
+            tail = 5;
+            trail = [];
+            pontos = 0;
+            document.getElementById('pontos').innerText = pontos;
+            gerarMaca();
+            snakeInterval = setInterval(gameLoop, 1000 / 10); // 10 FPS
+        }
+
+        function gameLoop() {
+            px += vx;
+            py += vy;
+
+            // Tratamento de colisão com as bordas (atravessa a parede)
+            if (px < 0) px = qp - 1;
+            if (px > qp - 1) px = 0;
+            if (py < 0) py = qp - 1;
+            if (py > qp - 1) py = 0;
+
+            // Fundo do Canvas
+            ctx.fillStyle = "#0b0c10";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha a Maçã (Branca para destacar no estilo do site)
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(ax * tp, ay * tp, tp - 1, tp - 1);
+
+            // Desenha a Cobra (Verde)
+            ctx.fillStyle = "#45f3ff";
+            for (let i = 0; i < trail.length; i++) {
+                ctx.fillRect(trail[i].x * tp, trail[i].y * tp, tp - 1, tp - 1);
+                
+                // Colisão da cabeça com o próprio corpo
+                if (trail[i].x == px && trail[i].y == py && trail.length > 5) {
+                    // Game Over simples: reinicia
+                    pontos = 0;
+                    document.getElementById('pontos').innerText = pontos;
+                    tail = 5;
+                }
+            }
+
+            trail.push({ x: px, y: py });
+            while (trail.length > tail) {
+                trail.shift();
+            }
+
+            // Cobra comeu a maçã
+            if (ax == px && ay == py) {
+                tail++;
+                pontos += 10;
+                document.getElementById('pontos').innerText = pontos;
+                gerarMaca();
+            }
+        }
+
+        function gerarMaca() {
+            ax = Math.floor(Math.random() * qp);
+            ay = Math.floor(Math.random() * qp);
+        }
+
+        function oPressionarTeclado(event) {
+            // Evita que a cobrinha volte na direção contrária diretamente
+            switch (event.keyCode) {
+                case 37: // Esquerda
+                    if(vx !== 1) { vx = -1; vy = 0; }
+                    break;
+                case 38: // Cima
+                    if(vy !== 1) { vx = 0; vy = -1; }
+                    break;
+                case 39: // Direita
+                    if(vx !== -1) { vx = 1; vy = 0; }
+                    break;
+                case 40: // Baixo
+                    if(vy !== -1) { vx = 0; vy = 1; }
+                    break;
+            }
+        }
+    </script>
+
+</body></html>

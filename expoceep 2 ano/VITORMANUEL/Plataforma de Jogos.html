@@ -1,0 +1,491 @@
+
+<!-- saved from url=(0049)file:///C:/Users/apare/Downloads/index%20(3).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body>!DOCTYPE html&gt;
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma de Jogos</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#222;
+    color:white;
+    text-align:center;
+    margin:0;
+}
+
+header{
+    background:#111;
+    padding:20px;
+}
+
+.menu{
+    margin:20px;
+}
+
+button{
+    padding:10px 20px;
+    margin:5px;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.game{
+    display:none;
+    margin-top:20px;
+}
+
+canvas{
+    background:white;
+    border:2px solid black;
+}
+
+#board{
+    display:grid;
+    grid-template-columns:repeat(3,100px);
+    gap:5px;
+    justify-content:center;
+    margin-top:20px;
+}
+
+.cell{
+    width:100px;
+    height:100px;
+    background:white;
+    color:black;
+    font-size:50px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+}
+</style>
+
+
+
+<header>
+<h1>🎮 Plataforma de Jogos</h1>
+</header>
+
+<div class="menu">
+<button onclick="showGame(&#39;snake&#39;)">🐍 Cobra</button>
+<button onclick="showGame(&#39;dino&#39;)">🦖 Dino</button>
+<button onclick="showGame(&#39;ttt&#39;)">❌⭕ Velha</button>
+</div>
+
+<!-- COBRA -->
+<div id="snake" class="game" style="display: block;">
+<h2>🐍 Jogo da Cobra</h2>
+<canvas id="snakeCanvas" width="400" height="400"></canvas>
+</div>
+
+<!-- DINO -->
+<div id="dino" class="game" style="display: none;">
+<h2>🦖 Dino Runner</h2>
+<p>Pressione ESPAÇO para pular</p>
+<canvas id="dinoCanvas" width="600" height="200"></canvas>
+</div>
+
+<!-- VELHA -->
+<div id="ttt" class="game" style="display: none;">
+<h2>❌⭕ Jogo da Velha</h2>
+<div id="board"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+<p id="status">Vez de X</p>
+<button onclick="resetTTT()">Reiniciar</button>
+</div>
+
+<script>
+// MENU
+function showGame(id){
+    document.querySelectorAll(".game").forEach(g=>g.style.display="none");
+    document.getElementById(id).style.display="block";
+}
+showGame("snake");
+
+//////////////////////////
+// COBRA
+//////////////////////////
+
+const snakeCanvas = document.getElementById("snakeCanvas");
+const sctx = snakeCanvas.getContext("2d");
+
+let snake = [{x:200,y:200}];
+let food = {x:100,y:100};
+let dx = 20;
+let dy = 0;
+
+document.addEventListener("keydown", e=>{
+    if(e.key==="ArrowUp" && dy===0){dx=0;dy=-20;}
+    if(e.key==="ArrowDown" && dy===0){dx=0;dy=20;}
+    if(e.key==="ArrowLeft" && dx===0){dx=-20;dy=0;}
+    if(e.key==="ArrowRight" && dx===0){dx=20;dy=0;}
+});
+
+function snakeGame(){
+    sctx.clearRect(0,0,400,400);
+
+    const head = {
+        x:snake[0].x+dx,
+        y:snake[0].y+dy
+    };
+
+    snake.unshift(head);
+
+    if(head.x===food.x && head.y===food.y){
+        food={
+            x:Math.floor(Math.random()*20)*20,
+            y:Math.floor(Math.random()*20)*20
+        };
+    }else{
+        snake.pop();
+    }
+
+    if(
+        head.x<0 || head.y<0 ||
+        head.x>=400 || head.y>=400
+    ){
+        snake=[{x:200,y:200}];
+        dx=20; dy=0;
+    }
+
+    sctx.fillStyle="red";
+    sctx.fillRect(food.x,food.y,20,20);
+
+    sctx.fillStyle="green";
+    snake.forEach(p=>{
+        sctx.fillRect(p.x,p.y,20,20);
+    });
+}
+
+setInterval(snakeGame,120);
+
+//////////////////////////
+// DINO
+//////////////////////////
+
+const dinoCanvas = document.getElementById("dinoCanvas");
+const dctx = dinoCanvas.getContext("2d");
+
+let dino = {
+    x: 50,
+    y: 140,
+    width: 44,
+    height: 47,
+    velocityY: 0,
+    jumping: false
+};
+
+let gravity = 0.8;
+let gameSpeed = 6;
+let score = 0;
+let gameOver = false;
+
+let groundX = 0;
+
+let obstacles = [];
+
+function spawnObstacle() {
+
+    if(gameOver) return;
+
+    const height = Math.random() > 0.5 ? 40 : 60;
+
+    obstacles.push({
+        x: 650,
+        width: 20,
+        height: height
+    });
+
+    const next = 1200 + Math.random() * 1000;
+
+    setTimeout(spawnObstacle, next);
+}
+
+spawnObstacle();
+
+document.addEventListener("keydown", e => {
+
+    if(e.code === "Space"){
+
+        if(gameOver){
+            restartDino();
+            return;
+        }
+
+        if(!dino.jumping){
+            dino.velocityY = -14;
+            dino.jumping = true;
+        }
+    }
+});
+
+function restartDino(){
+
+    obstacles = [];
+    score = 0;
+    gameSpeed = 6;
+    gameOver = false;
+
+    dino.y = 140;
+    dino.velocityY = 0;
+    dino.jumping = false;
+
+    spawnObstacle();
+}
+
+function updateDino(){
+
+    dino.velocityY += gravity;
+    dino.y += dino.velocityY;
+
+    if(dino.y >= 140){
+        dino.y = 140;
+        dino.velocityY = 0;
+        dino.jumping = false;
+    }
+
+    obstacles.forEach(obstacle=>{
+        obstacle.x -= gameSpeed;
+    });
+
+    obstacles = obstacles.filter(
+        obstacle => obstacle.x + obstacle.width > 0
+    );
+
+    for(let obstacle of obstacles){
+
+        if(
+            dino.x < obstacle.x + obstacle.width &&
+            dino.x + dino.width > obstacle.x &&
+            dino.y < 180 - obstacle.height &&
+            dino.y + dino.height > 180 - obstacle.height
+        ){
+            gameOver = true;
+        }
+    }
+
+    if(!gameOver){
+        score += 0.1;
+        gameSpeed += 0.0005;
+    }
+
+    groundX -= gameSpeed;
+
+    if(groundX <= -40){
+        groundX = 0;
+    }
+}
+
+function drawDino(){
+
+    dctx.clearRect(0,0,600,200);
+
+    dctx.fillStyle = "#fff";
+    dctx.fillRect(0,0,600,200);
+
+    // chão
+    dctx.fillStyle = "#555";
+
+    for(let i=0;i<20;i++){
+
+        dctx.fillRect(
+            i * 40 + groundX,
+            180,
+            30,
+            2
+        );
+    }
+
+    // nuvens
+    dctx.fillStyle="#ddd";
+    dctx.fillRect(450,40,40,10);
+    dctx.fillRect(460,30,20,10);
+
+    // dinossauro
+    dctx.fillStyle="#222";
+
+    // corpo
+    dctx.fillRect(
+        dino.x,
+        dino.y,
+        28,
+        30
+    );
+
+    // cabeça
+    dctx.fillRect(
+        dino.x + 18,
+        dino.y - 15,
+        22,
+        18
+    );
+
+    // pescoço
+    dctx.fillRect(
+        dino.x + 18,
+        dino.y - 5,
+        10,
+        15
+    );
+
+    // cauda
+    dctx.fillRect(
+        dino.x - 10,
+        dino.y + 10,
+        12,
+        6
+    );
+
+    // pernas
+    dctx.fillRect(
+        dino.x + 5,
+        dino.y + 30,
+        5,
+        15
+    );
+
+    dctx.fillRect(
+        dino.x + 18,
+        dino.y + 30,
+        5,
+        15
+    );
+
+    // olho
+    dctx.fillStyle="white";
+    dctx.fillRect(
+        dino.x + 30,
+        dino.y - 10,
+        3,
+        3
+    );
+
+    dctx.fillStyle="#222";
+
+    // obstáculos
+    obstacles.forEach(obstacle=>{
+
+        dctx.fillRect(
+            obstacle.x,
+            180 - obstacle.height,
+            obstacle.width,
+            obstacle.height
+        );
+
+        dctx.fillRect(
+            obstacle.x - 5,
+            180 - obstacle.height + 15,
+            5,
+            10
+        );
+
+        dctx.fillRect(
+            obstacle.x + obstacle.width,
+            180 - obstacle.height + 25,
+            5,
+            10
+        );
+    });
+
+    dctx.fillStyle="black";
+    dctx.font="20px monospace";
+    dctx.fillText(
+        Math.floor(score).toString().padStart(5,"0"),
+        470,
+        30
+    );
+
+    if(gameOver){
+
+        dctx.font="28px Arial";
+        dctx.fillText(
+            "GAME OVER",
+            190,
+            90
+        );
+
+        dctx.font="16px Arial";
+        dctx.fillText(
+            "Pressione ESPAÇO para reiniciar",
+            160,
+            120
+        );
+    }
+}
+
+function gameLoop(){
+
+    updateDino();
+    drawDino();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+//////////////////////////
+// JOGO DA VELHA
+//////////////////////////
+
+const board=document.getElementById("board");
+const statusText=document.getElementById("status");
+
+let cells=["","","","","","","","",""];
+let current="X";
+
+function drawBoard(){
+    board.innerHTML="";
+    cells.forEach((v,i)=>{
+        const cell=document.createElement("div");
+        cell.className="cell";
+        cell.textContent=v;
+        cell.onclick=()=>move(i);
+        board.appendChild(cell);
+    });
+}
+
+function move(i){
+    if(cells[i]!="") return;
+
+    cells[i]=current;
+
+    const wins=[
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+
+    for(let w of wins){
+        if(
+            cells[w[0]] &&
+            cells[w[0]]===cells[w[1]] &&
+            cells[w[1]]===cells[w[2]]
+        ){
+            statusText.textContent=
+            current+" venceu!";
+            drawBoard();
+            return;
+        }
+    }
+
+    current=current==="X"?"O":"X";
+    statusText.textContent="Vez de "+current;
+
+    drawBoard();
+}
+
+function resetTTT(){
+    cells=["","","","","","","","",""];
+    current="X";
+    statusText.textContent="Vez de X";
+    drawBoard();
+}
+
+resetTTT();
+</script>
+
+
+</body></html>

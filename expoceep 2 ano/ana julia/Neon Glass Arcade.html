@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)https://mimi-bloood.github.io/TRABALHO-PRA-MATERIA-mmi-/ -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Glass Arcade</title>
+<style>
+    :root{
+        --bg:#050508;
+        --glass-blue: rgba(0,170,255,0.12);
+        --glass-pink: rgba(255,0,170,0.12);
+        --line-blue: rgba(0,170,255,0.72);
+        --line-pink: rgba(255,0,170,0.72);
+        --shadow-blue: rgba(0,170,255,0.35);
+        --shadow-pink: rgba(255,0,170,0.35);
+        --text:#ffffff;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{
+        margin:0;
+        width:100%;
+        height:100%;
+        overflow:hidden;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+            radial-gradient(circle at top, rgba(0,170,255,0.08), transparent 35%),
+            radial-gradient(circle at bottom, rgba(255,0,170,0.07), transparent 40%),
+            var(--bg);
+        color:var(--text);
+    }
+
+    body{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .retangulo{
+        width:min(1200px, 94vw);
+        height:min(650px, 90vh);
+        background:rgba(10,10,18,0.72);
+        backdrop-filter: blur(8px);
+        border-radius:24px;
+        border:2px solid rgba(0,170,255,0.55);
+        box-shadow:
+            0 0 12px var(--shadow-blue),
+            0 0 24px rgba(0,170,255,0.18),
+            inset 0 0 18px rgba(255,255,255,0.04);
+        position:relative;
+        overflow:hidden;
+        transition:0.5s ease;
+    }
+
+    .rosa{
+        border-color: rgba(255,0,170,0.55);
+        box-shadow:
+            0 0 12px var(--shadow-pink),
+            0 0 24px rgba(255,0,170,0.18),
+            inset 0 0 18px rgba(255,255,255,0.04);
+    }
+
+    .tela{
+        position:absolute;
+        inset:0;
+        padding:30px;
+        display:none;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:18px;
+    }
+
+    .ativa{ display:flex; }
+
+    .titulo{
+        font-size:42px;
+        font-weight:800;
+        letter-spacing:1px;
+        text-align:center;
+        text-shadow:0 0 12px rgba(255,255,255,0.35);
+        margin:0;
+    }
+
+    .subtitulo{
+        margin:0;
+        opacity:0.9;
+        font-size:16px;
+        text-align:center;
+    }
+
+    .entrar{
+        width:min(340px, 80vw);
+        height:104px;
+        border:none;
+        border-radius:18px;
+        background:rgba(0,170,255,0.16);
+        color:white;
+        font-size:32px;
+        font-weight:bold;
+        cursor:pointer;
+        border:2px solid rgba(0,170,255,0.72);
+        box-shadow:0 0 12px rgba(0,170,255,0.5), 0 0 22px rgba(0,170,255,0.22);
+        transition:0.25s;
+    }
+
+    .entrar:hover, .botao:hover, .voltar:hover, .card:hover, .mini:hover, .acao:hover{
+        transform:scale(1.04);
+    }
+
+    .menu{
+        display:grid;
+        grid-template-columns:repeat(2, minmax(220px, 1fr));
+        gap:22px;
+        width:min(760px, 90%);
+        margin-top:10px;
+    }
+
+    .botao{
+        height:110px;
+        border:none;
+        border-radius:18px;
+        background:rgba(255,0,170,0.14);
+        color:white;
+        font-size:26px;
+        font-weight:bold;
+        cursor:pointer;
+        border:2px solid rgba(255,0,170,0.72);
+        box-shadow:0 0 12px rgba(255,0,170,0.45), 0 0 22px rgba(255,0,170,0.22);
+        transition:0.25s;
+    }
+
+    .botao:nth-child(1), .botao:nth-child(4){
+        background:rgba(0,170,255,0.14);
+        border-color:rgba(0,170,255,0.72);
+        box-shadow:0 0 12px rgba(0,170,255,0.45), 0 0 22px rgba(0,170,255,0.22);
+    }
+
+    .botao:nth-child(2), .botao:nth-child(5){
+        background:rgba(255,0,170,0.12);
+    }
+
+    .botao:nth-child(3){
+        background:rgba(0,170,255,0.11);
+    }
+
+    .game-wrap{
+        width:100%;
+        height:100%;
+        position:relative;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:16px;
+    }
+
+    .voltar{
+        position:absolute;
+        top:18px;
+        left:18px;
+        width:52px;
+        height:52px;
+        border-radius:16px;
+        border:2px solid rgba(0,170,255,0.7);
+        background:rgba(0,170,255,0.12);
+        color:white;
+        font-size:24px;
+        font-weight:bold;
+        cursor:pointer;
+        box-shadow:0 0 10px rgba(0,170,255,0.35);
+        transition:0.25s;
+        z-index:4;
+    }
+
+    .badge{
+        padding:8px 14px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,0.18);
+        background:rgba(255,255,255,0.05);
+        box-shadow:0 0 10px rgba(255,255,255,0.05);
+        font-size:14px;
+    }
+
+    .painel{
+        padding:16px 18px;
+        border-radius:18px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:inset 0 0 16px rgba(255,255,255,0.03);
+    }
+
+    /* JOGO DA VELHA */
+    .tabuleiro{
+        display:grid;
+        grid-template-columns:repeat(3, 140px);
+        gap:14px;
+    }
+
+    .casa{
+        width:140px;
+        height:140px;
+        border-radius:20px;
+        border:2px solid rgba(255,255,255,0.14);
+        background:rgba(255,255,255,0.04);
+        color:white;
+        font-size:72px;
+        font-weight:bold;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:inset 0 0 14px rgba(255,255,255,0.03);
+        transition:0.2s;
+    }
+
+    .x{ color:#00aaff; text-shadow:0 0 10px #00aaff; }
+    .o{ color:#ff00aa; text-shadow:0 0 10px #ff00aa; }
+
+    .status{ font-size:28px; font-weight:700; text-align:center; }
+
+    .acao{
+        border:none;
+        border-radius:14px;
+        padding:12px 18px;
+        cursor:pointer;
+        color:white;
+        font-weight:bold;
+        background:rgba(255,0,170,0.15);
+        border:1px solid rgba(255,0,170,0.7);
+        box-shadow:0 0 10px rgba(255,0,170,0.25);
+        transition:0.25s;
+    }
+
+    .acao.azul{
+        background:rgba(0,170,255,0.15);
+        border-color:rgba(0,170,255,0.7);
+        box-shadow:0 0 10px rgba(0,170,255,0.25);
+    }
+
+    .linhas{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+    /* MEMÓRIA */
+    .memoria-grid{
+        display:grid;
+        grid-template-columns:repeat(4, 100px);
+        gap:12px;
+        justify-content:center;
+    }
+
+    .card{
+        width:100px;
+        height:100px;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,0.12);
+        background:rgba(255,255,255,0.05);
+        color:white;
+        font-size:34px;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 0 10px rgba(255,255,255,0.03);
+        transition:0.2s;
+        user-select:none;
+    }
+
+    .card.virada{
+        background:rgba(0,170,255,0.12);
+        border-color:rgba(0,170,255,0.55);
+    }
+    .card.certa{
+        background:rgba(255,0,170,0.12);
+        border-color:rgba(255,0,170,0.55);
+        opacity:0.95;
+        cursor:default;
+    }
+
+    /* SNAKE */
+    .snake-info, .dodge-info, .target-info{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        justify-content:center;
+        align-items:center;
+    }
+
+    .snake-board{
+        width:min(440px, 88vw);
+        aspect-ratio:1;
+        display:grid;
+        grid-template-columns:repeat(20, 1fr);
+        gap:3px;
+        padding:10px;
+        border-radius:22px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.1);
+    }
+
+    .cell{
+        border-radius:5px;
+        background:rgba(255,255,255,0.03);
+    }
+    .snake{ background:rgba(0,170,255,0.95); box-shadow:0 0 8px rgba(0,170,255,0.75); }
+    .snake2{ background:rgba(255,0,170,0.92); box-shadow:0 0 8px rgba(255,0,170,0.75); }
+    .food{ background:rgba(255,255,255,0.95); box-shadow:0 0 10px rgba(255,255,255,0.8); }
+
+    /* DODGE */
+    .dodge-area{
+        position:relative;
+        width:min(480px, 88vw);
+        height:360px;
+        border-radius:22px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.1);
+        overflow:hidden;
+        box-shadow:inset 0 0 18px rgba(255,255,255,0.03);
+    }
+    .player, .block{
+        position:absolute;
+        border-radius:14px;
+    }
+    .player{
+        width:54px;
+        height:18px;
+        bottom:18px;
+        left:50%;
+        transform:translateX(-50%);
+        background:rgba(0,170,255,0.95);
+        box-shadow:0 0 12px rgba(0,170,255,0.85);
+    }
+    .block{
+        width:42px;
+        height:42px;
+        top:-50px;
+        background:rgba(255,0,170,0.9);
+        box-shadow:0 0 12px rgba(255,0,170,0.75);
+    }
+
+    /* ALVO */
+    .target-area{
+        position:relative;
+        width:min(620px, 90vw);
+        height:360px;
+        border-radius:22px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.1);
+        overflow:hidden;
+    }
+    .target{
+        position:absolute;
+        width:56px;
+        height:56px;
+        border-radius:50%;
+        border:2px solid rgba(255,255,255,0.7);
+        background:radial-gradient(circle, rgba(255,255,255,1) 0 16%, rgba(255,0,170,1) 17% 35%, rgba(0,170,255,1) 36% 58%, rgba(255,255,255,1) 59% 100%);
+        box-shadow:0 0 12px rgba(255,255,255,0.7), 0 0 18px rgba(0,170,255,0.45), 0 0 18px rgba(255,0,170,0.45);
+        cursor:pointer;
+    }
+
+    .rodape-dicas{
+        position:absolute;
+        bottom:16px;
+        left:50%;
+        transform:translateX(-50%);
+        opacity:0.72;
+        font-size:13px;
+        text-align:center;
+        width:90%;
+    }
+
+    @media (max-width: 820px){
+        .titulo{ font-size:32px; }
+        .menu{ grid-template-columns:1fr; width:min(450px, 92%); }
+        .botao{ height:92px; font-size:22px; }
+        .tabuleiro{ grid-template-columns:repeat(3, 92px); }
+        .casa{ width:92px; height:92px; font-size:48px; border-radius:16px; }
+        .memoria-grid{ grid-template-columns:repeat(4, 70px); }
+        .card{ width:70px; height:70px; font-size:24px; }
+        .snake-board{ width:min(350px, 90vw); }
+        .dodge-area, .target-area{ height:300px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="retangulo" id="retangulo">
+
+    <!-- TELA INICIAL -->
+    <section class="tela ativa" id="tela-inicial">
+        <h1 class="titulo">NEON GLASS ARCADE</h1>
+        <p class="subtitulo">um site com 5 joguinhos feito por uma pessoa</p>
+        <button class="entrar" onclick="irMenu()">ENTRAR</button>
+    </section>
+
+    <!-- MENU -->
+    <section class="tela" id="tela-menu">
+        <h1 class="titulo">MENU PRINCIPAL</h1>
+        <p class="subtitulo">escolhe teu joguinho neon</p>
+        <div class="menu">
+            <button class="botao" onclick="abrirTela(&#39;ttt&#39;)">🩷 Jogo da Velha</button>
+            <button class="botao" onclick="abrirTela(&#39;memoria&#39;)">🧠 Memória Neon</button>
+            <button class="botao" onclick="abrirTela(&#39;snake&#39;)">🐍 Snake Neon</button>
+            <button class="botao" onclick="abrirTela(&#39;dodge&#39;)">🌙 Dodge Neon</button>
+            <button class="botao" style="grid-column:span 2; justify-self:center; width:min(320px, 100%);" onclick="abrirTela(&#39;alvo&#39;)">🎯 Alvo Neon</button>
+        </div>
+    </section>
+
+    <!-- JOGO DA VELHA -->
+    <section class="tela" id="tela-ttt">
+        <div class="game-wrap">
+            <button class="voltar" onclick="voltarMenu()">←</button>
+            <h1 class="titulo">JOGO DA VELHA</h1>
+            <p class="subtitulo">azul é X, rosa é O</p>
+            <div class="status" id="ttt-status">VEZ DO X</div>
+            <div class="tabuleiro" id="ttt-board">
+                <div class="casa" onclick="jogar(this,0)"></div>
+                <div class="casa" onclick="jogar(this,1)"></div>
+                <div class="casa" onclick="jogar(this,2)"></div>
+                <div class="casa" onclick="jogar(this,3)"></div>
+                <div class="casa" onclick="jogar(this,4)"></div>
+                <div class="casa" onclick="jogar(this,5)"></div>
+                <div class="casa" onclick="jogar(this,6)"></div>
+                <div class="casa" onclick="jogar(this,7)"></div>
+                <div class="casa" onclick="jogar(this,8)"></div>
+            </div>
+            <div class="linhas">
+                <button class="acao azul" onclick="reiniciarTTT()">REINICIAR</button>
+            </div>
+            <div class="rodape-dicas">dica: clique nas casas para jogar</div>
+        </div>
+    </section>
+
+    <!-- MEMÓRIA -->
+    <section class="tela" id="tela-memoria">
+        <div class="game-wrap">
+            <button class="voltar" onclick="voltarMenu()">←</button>
+            <h1 class="titulo">MEMÓRIA NEON</h1>
+            <p class="subtitulo">ache os pares antes de acabar as tentativas</p>
+            <div class="snake-info">
+                <div class="badge">Pares: <span id="mem-pares">0</span>/6</div>
+                <div class="badge">Tentativas: <span id="mem-tentativas">0</span></div>
+            </div>
+            <div class="memoria-grid" id="mem-grid"><div class="card" data-emoji="✨" data-index="0">✦</div><div class="card" data-emoji="🍓" data-index="1">✦</div><div class="card" data-emoji="🖤" data-index="2">✦</div><div class="card" data-emoji="🍓" data-index="3">✦</div><div class="card" data-emoji="🦋" data-index="4">✦</div><div class="card" data-emoji="🌙" data-index="5">✦</div><div class="card" data-emoji="🌙" data-index="6">✦</div><div class="card" data-emoji="🖤" data-index="7">✦</div><div class="card" data-emoji="🩷" data-index="8">✦</div><div class="card" data-emoji="✨" data-index="9">✦</div><div class="card" data-emoji="🦋" data-index="10">✦</div><div class="card" data-emoji="🩷" data-index="11">✦</div></div>
+            <div class="linhas">
+                <button class="acao azul" onclick="reiniciarMemoria()">REINICIAR</button>
+            </div>
+            <div class="rodape-dicas">dica: memorização rápida, estilo fofinho neon</div>
+        </div>
+    </section>
+
+    <!-- SNAKE -->
+    <section class="tela" id="tela-snake">
+        <div class="game-wrap">
+            <button class="voltar" onclick="voltarMenu()">←</button>
+            <h1 class="titulo">SNAKE NEON</h1>
+            <p class="subtitulo">usa as setas do teclado</p>
+            <div class="snake-info">
+                <div class="badge">Score: <span id="snake-score">0</span></div>
+                <div class="badge">Maior: <span id="snake-best">0</span></div>
+            </div>
+            <div class="snake-board" id="snake-board"><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell food"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div></div>
+            <div class="linhas">
+                <button class="acao azul" onclick="reiniciarSnake()">REINICIAR</button>
+            </div>
+            <div class="rodape-dicas">dica: come o bloco branco, não encosta na borda</div>
+        </div>
+    </section>
+
+    <!-- DODGE -->
+    <section class="tela" id="tela-dodge">
+        <div class="game-wrap">
+            <button class="voltar" onclick="voltarMenu()">←</button>
+            <h1 class="titulo">DODGE NEON</h1>
+            <p class="subtitulo">desvie dos blocos rosas que caem</p>
+            <div class="dodge-info">
+                <div class="badge">Tempo: <span id="dodge-time">0</span>s</div>
+                <div class="badge">Recorde: <span id="dodge-best">6</span>s</div>
+            </div>
+            <div class="dodge-area" id="dodge-area">
+                <div class="player" id="player"></div>
+            </div>
+            <div class="linhas">
+                <button class="acao azul" onclick="reiniciarDodge()">REINICIAR</button>
+            </div>
+            <div class="rodape-dicas">dica: use ← → no teclado</div>
+        </div>
+    </section>
+
+    <!-- ALVO -->
+    <section class="tela" id="tela-alvo">
+        <div class="game-wrap">
+            <button class="voltar" onclick="voltarMenu()">←</button>
+            <h1 class="titulo">ALVO NEON</h1>
+            <p class="subtitulo">clique no alvo para somar pontos</p>
+            <div class="target-info">
+                <div class="badge">Pontos: <span id="target-score">0</span></div>
+                <div class="badge">Tempo: <span id="target-time">30</span>s</div>
+            </div>
+            <div class="target-area" id="target-area">
+                <div class="target" id="target" onclick="clicarAlvo()"></div>
+            </div>
+            <div class="linhas">
+                <button class="acao azul" onclick="reiniciarAlvo()">REINICIAR</button>
+            </div>
+            <div class="rodape-dicas">dica: quanto mais rápido, mais pontos</div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+/* ------------------ TELAS ------------------ */
+const retangulo = document.getElementById('retangulo');
+const telas = {
+    inicial: document.getElementById('tela-inicial'),
+    menu: document.getElementById('tela-menu'),
+    ttt: document.getElementById('tela-ttt'),
+    memoria: document.getElementById('tela-memoria'),
+    snake: document.getElementById('tela-snake'),
+    dodge: document.getElementById('tela-dodge'),
+    alvo: document.getElementById('tela-alvo')
+};
+
+function mostrarTela(nome){
+    Object.values(telas).forEach(t => t.classList.remove('ativa'));
+    telas[nome].classList.add('ativa');
+}
+
+function irMenu(){
+    retangulo.classList.add('rosa');
+    mostrarTela('menu');
+}
+
+function voltarMenu(){
+    mostrarTela('menu');
+    pararSnake();
+    pararDodge();
+    pararAlvo();
+}
+
+function abrirTela(nome){
+    mostrarTela(nome);
+    if(nome === 'snake') iniciarSnake();
+    if(nome === 'dodge') iniciarDodge();
+    if(nome === 'alvo') iniciarAlvo();
+    if(nome === 'memoria' && memoriaViradas.length === 0 && memoriaPares === 0) reiniciarMemoria();
+}
+
+/* ------------------ JOGO DA VELHA ------------------ */
+let jogador = 'X';
+let tabuleiroTTT = ['', '', '', '', '', '', '', '', ''];
+let jogoAcabouTTT = false;
+const tttStatus = document.getElementById('ttt-status');
+const vitorias = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function reiniciarTTT(){
+    jogador = 'X';
+    tabuleiroTTT = ['', '', '', '', '', '', '', '', ''];
+    jogoAcabouTTT = false;
+    tttStatus.textContent = 'VEZ DO X';
+    document.querySelectorAll('#ttt-board .casa').forEach(c => {
+        c.textContent = '';
+        c.classList.remove('x', 'o');
+    });
+}
+
+function jogar(casa, index){
+    if(tabuleiroTTT[index] !== '' || jogoAcabouTTT) return;
+    tabuleiroTTT[index] = jogador;
+    casa.textContent = jogador;
+    casa.classList.add(jogador === 'X' ? 'x' : 'o');
+
+    for(const trio of vitorias){
+        const [a,b,c] = trio;
+        if(tabuleiroTTT[a] && tabuleiroTTT[a] === tabuleiroTTT[b] && tabuleiroTTT[a] === tabuleiroTTT[c]){
+            jogoAcabouTTT = true;
+            tttStatus.textContent = `✨ Jogador ${tabuleiroTTT[a]} venceu! ✨`;
+            return;
+        }
+    }
+
+    if(tabuleiroTTT.every(c => c !== '')){
+        jogoAcabouTTT = true;
+        tttStatus.textContent = '🤝 Empate! O jogo terminou em velha 🤝';
+        return;
+    }
+
+    jogador = jogador === 'X' ? 'O' : 'X';
+    tttStatus.textContent = `VEZ DO ${jogador}`;
+}
+
+/* ------------------ MEMÓRIA ------------------ */
+const memGrid = document.getElementById('mem-grid');
+const memParesEl = document.getElementById('mem-pares');
+const memTentativasEl = document.getElementById('mem-tentativas');
+const emojisMemoria = ['🖤','🩷','✨','🌙','🦋','🍓'];
+let memoriaCartas = [];
+let memoriaViradas = [];
+let memoriaBloqueio = false;
+let memoriaPares = 0;
+let memoriaTentativas = 0;
+
+function embaralhar(arr){
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function reiniciarMemoria(){
+    memoriaCartas = embaralhar([...emojisMemoria, ...emojisMemoria]);
+    memoriaViradas = [];
+    memoriaBloqueio = false;
+    memoriaPares = 0;
+    memoriaTentativas = 0;
+    memParesEl.textContent = memoriaPares;
+    memTentativasEl.textContent = memoriaTentativas;
+    memGrid.innerHTML = '';
+
+    memoriaCartas.forEach((emoji, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.emoji = emoji;
+        card.dataset.index = idx;
+        card.textContent = '✦';
+        card.addEventListener('click', () => virarCarta(card));
+        memGrid.appendChild(card);
+    });
+}
+
+function virarCarta(card){
+    if(memoriaBloqueio || card.classList.contains('virada') || card.classList.contains('certa')) return;
+    if(memoriaViradas.length >= 2) return;
+
+    card.classList.add('virada');
+    card.textContent = card.dataset.emoji;
+    memoriaViradas.push(card);
+
+    if(memoriaViradas.length === 2){
+        memoriaBloqueio = true;
+        memoriaTentativas++;
+        memTentativasEl.textContent = memoriaTentativas;
+
+        const [a,b] = memoriaViradas;
+        if(a.dataset.emoji === b.dataset.emoji){
+            setTimeout(() => {
+                a.classList.add('certa');
+                b.classList.add('certa');
+                memoriaViradas = [];
+                memoriaBloqueio = false;
+                memoriaPares++;
+                memParesEl.textContent = memoriaPares;
+                if(memoriaPares === emojisMemoria.length){
+                    memParesEl.textContent = '6';
+                    setTimeout(() => alert('✨ Você venceu a Memória Neon! ✨'), 200);
+                }
+            }, 500);
+        } else {
+            setTimeout(() => {
+                a.classList.remove('virada');
+                b.classList.remove('virada');
+                a.textContent = '✦';
+                b.textContent = '✦';
+                memoriaViradas = [];
+                memoriaBloqueio = false;
+            }, 700);
+        }
+    }
+}
+
+/* ------------------ SNAKE ------------------ */
+const snakeBoard = document.getElementById('snake-board');
+const snakeScoreEl = document.getElementById('snake-score');
+const snakeBestEl = document.getElementById('snake-best');
+const GRID = 20;
+let snakeCells = [];
+let snakeTimer = null;
+let snakeDirection = 'right';
+let nextDirection = 'right';
+let snake = [];
+let food = {x:10, y:10};
+let snakeScore = 0;
+let snakeBest = Number(localStorage.getItem('snakeBest') || 0);
+snakeBestEl.textContent = snakeBest;
+
+function buildSnakeBoard(){
+    snakeBoard.innerHTML = '';
+    snakeCells = [];
+    for(let i = 0; i < GRID * GRID; i++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        snakeBoard.appendChild(cell);
+        snakeCells.push(cell);
+    }
+}
+
+function placeFood(){
+    let pos;
+    do{
+        pos = {
+            x: Math.floor(Math.random() * GRID),
+            y: Math.floor(Math.random() * GRID)
+        };
+    } while(snake.some(s => s.x === pos.x && s.y === pos.y));
+    food = pos;
+}
+
+function resetSnakeState(){
+    snake = [
+        {x:9,y:10},
+        {x:8,y:10},
+        {x:7,y:10}
+    ];
+    snakeDirection = 'right';
+    nextDirection = 'right';
+    snakeScore = 0;
+    snakeScoreEl.textContent = snakeScore;
+    placeFood();
+    drawSnake();
+}
+
+function iniciarSnake(){
+    buildSnakeBoard();
+    resetSnakeState();
+    pararSnake();
+    snakeTimer = setInterval(stepSnake, 130);
+}
+
+function pararSnake(){
+    if(snakeTimer){ clearInterval(snakeTimer); snakeTimer = null; }
+}
+
+function reiniciarSnake(){
+    iniciarSnake();
+}
+
+function stepSnake(){
+    snakeDirection = nextDirection;
+    const head = {...snake[0]};
+    if(snakeDirection === 'right') head.x++;
+    if(snakeDirection === 'left') head.x--;
+    if(snakeDirection === 'up') head.y--;
+    if(snakeDirection === 'down') head.y++;
+
+    if(head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID || snake.some((s, i) => i !== 0 && s.x === head.x && s.y === head.y)){
+        pararSnake();
+        snakeScoreEl.textContent = `game over (${snakeScore})`;
+        return;
+    }
+
+    snake.unshift(head);
+
+    if(head.x === food.x && head.y === food.y){
+        snakeScore += 1;
+        snakeScoreEl.textContent = snakeScore;
+        if(snakeScore > snakeBest){
+            snakeBest = snakeScore;
+            snakeBestEl.textContent = snakeBest;
+            localStorage.setItem('snakeBest', snakeBest);
+        }
+        placeFood();
+    } else {
+        snake.pop();
+    }
+
+    drawSnake();
+}
+
+function drawSnake(){
+    snakeCells.forEach(c => c.className = 'cell');
+    snake.forEach((part, i) => {
+        const index = part.y * GRID + part.x;
+        if(snakeCells[index]) snakeCells[index].classList.add(i === 0 ? 'snake2' : 'snake');
+    });
+    const foodIndex = food.y * GRID + food.x;
+    if(snakeCells[foodIndex]) snakeCells[foodIndex].classList.add('food');
+}
+
+window.addEventListener('keydown', (e) => {
+    const key = e.key;
+    if((key === 'ArrowUp' || key === 'w') && snakeDirection !== 'down') nextDirection = 'up';
+    if((key === 'ArrowDown' || key === 's') && snakeDirection !== 'up') nextDirection = 'down';
+    if((key === 'ArrowLeft' || key === 'a') && snakeDirection !== 'right') nextDirection = 'left';
+    if((key === 'ArrowRight' || key === 'd') && snakeDirection !== 'left') nextDirection = 'right';
+
+    if(dodgeRunning){
+        if(key === 'ArrowLeft' || key === 'a') movePlayer(-1);
+        if(key === 'ArrowRight' || key === 'd') movePlayer(1);
+    }
+});
+
+/* ------------------ DODGE ------------------ */
+const dodgeArea = document.getElementById('dodge-area');
+const player = document.getElementById('player');
+const dodgeTimeEl = document.getElementById('dodge-time');
+const dodgeBestEl = document.getElementById('dodge-best');
+let dodgeBlocks = [];
+let dodgeRunning = false;
+let dodgeFrame = null;
+let dodgeTimer = null;
+let dodgeTime = 0;
+let dodgeBest = Number(localStorage.getItem('dodgeBest') || 0);
+dodgeBestEl.textContent = dodgeBest;
+let playerX = 50;
+
+function movePlayer(dir){
+    const areaWidth = dodgeArea.clientWidth;
+    playerX += dir * 26;
+    playerX = Math.max(0, Math.min(areaWidth - 54, playerX));
+    player.style.left = playerX + 'px';
+    player.style.transform = 'translateX(0)';
+}
+
+function reiniciarDodge(){
+    iniciarDodge();
+}
+
+function iniciarDodge(){
+    pararDodge();
+    dodgeBlocks = [];
+    dodgeRunning = true;
+    dodgeTime = 0;
+    dodgeTimeEl.textContent = dodgeTime;
+    playerX = (dodgeArea.clientWidth / 2) - 27;
+    player.style.left = playerX + 'px';
+    player.style.transform = 'translateX(0)';
+    document.querySelectorAll('.block').forEach(b => b.remove());
+    dodgeTimer = setInterval(() => {
+        if(!dodgeRunning) return;
+        dodgeTime++;
+        dodgeTimeEl.textContent = dodgeTime;
+        if(dodgeTime > dodgeBest){
+            dodgeBest = dodgeTime;
+            dodgeBestEl.textContent = dodgeBest;
+            localStorage.setItem('dodgeBest', dodgeBest);
+        }
+    }, 1000);
+    loopDodge();
+}
+
+function criarBloco(){
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.style.left = Math.floor(Math.random() * (dodgeArea.clientWidth - 42)) + 'px';
+    block.style.top = '-45px';
+    dodgeArea.appendChild(block);
+    dodgeBlocks.push({el:block, x: parseFloat(block.style.left), y:-45, speed:2.4 + Math.random() * 2.5});
+}
+
+function loopDodge(){
+    if(!dodgeRunning) return;
+    if(Math.random() < 0.06 && dodgeBlocks.length < 9) criarBloco();
+
+    const px = player.offsetLeft;
+    const py = player.offsetTop;
+
+    dodgeBlocks.forEach((b, i) => {
+        b.y += b.speed;
+        b.el.style.top = b.y + 'px';
+        const bx = b.el.offsetLeft;
+        const by = b.el.offsetTop;
+        const bw = b.el.offsetWidth;
+        const bh = b.el.offsetHeight;
+        const pw = player.offsetWidth;
+        const ph = player.offsetHeight;
+
+        const hit = px < bx + bw && px + pw > bx && py < by + bh && py + ph > by;
+        if(hit){
+            fimDodge();
+            return;
+        }
+        if(b.y > dodgeArea.clientHeight + 50){
+            b.el.remove();
+            dodgeBlocks.splice(i, 1);
+        }
+    });
+
+    dodgeFrame = requestAnimationFrame(loopDodge);
+}
+
+function fimDodge(){
+    if(!dodgeRunning) return;
+    dodgeRunning = false;
+    if(dodgeTimer) clearInterval(dodgeTimer);
+    dodgeTimer = null;
+    cancelAnimationFrame(dodgeFrame);
+    dodgeTimeEl.textContent = `${dodgeTime} (fim!)`;
+}
+
+function pararDodge(){
+    dodgeRunning = false;
+    if(dodgeTimer) clearInterval(dodgeTimer);
+    dodgeTimer = null;
+    if(dodgeFrame) cancelAnimationFrame(dodgeFrame);
+    dodgeFrame = null;
+    dodgeBlocks.forEach(b => b.el.remove());
+    dodgeBlocks = [];
+}
+
+/* ------------------ ALVO ------------------ */
+const targetArea = document.getElementById('target-area');
+const target = document.getElementById('target');
+const targetScoreEl = document.getElementById('target-score');
+const targetTimeEl = document.getElementById('target-time');
+let targetScore = 0;
+let targetTime = 30;
+let targetTimer = null;
+
+function posicaoAlvo(){
+    const maxX = targetArea.clientWidth - 56;
+    const maxY = targetArea.clientHeight - 56;
+    const x = Math.floor(Math.random() * maxX);
+    const y = Math.floor(Math.random() * maxY);
+    target.style.left = x + 'px';
+    target.style.top = y + 'px';
+}
+
+function clicarAlvo(){
+    if(targetTime <= 0) return;
+    targetScore++;
+    targetScoreEl.textContent = targetScore;
+    posicaoAlvo();
+}
+
+function iniciarAlvo(){
+    pararAlvo();
+    targetScore = 0;
+    targetTime = 30;
+    targetScoreEl.textContent = targetScore;
+    targetTimeEl.textContent = targetTime;
+    posicaoAlvo();
+    targetTimer = setInterval(() => {
+        targetTime--;
+        targetTimeEl.textContent = targetTime;
+        if(targetTime <= 0){
+            clearInterval(targetTimer);
+            targetTimer = null;
+            targetTimeEl.textContent = '0 (fim!)';
+        }
+    }, 1000);
+}
+
+function reiniciarAlvo(){
+    iniciarAlvo();
+}
+
+function pararAlvo(){
+    if(targetTimer){ clearInterval(targetTimer); targetTimer = null; }
+}
+
+/* ------------------ INICIALIZAÇÃO ------------------ */
+reiniciarTTT();
+reiniciarMemoria();
+buildSnakeBoard();
+drawSnake();
+</script>
+
+
+</body></html>

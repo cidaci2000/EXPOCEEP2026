@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcadeCentral Mega - Plataforma de Jogos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="auth-screen" class="screen">
+        <div class="auth-container">
+            <h2>🎮 ArcadeCentral Mega</h2>
+            <div id="login-box">
+                <h3>Escolha seu Nickname</h3>
+                <input type="text" id="player-nickname" placeholder="Ex: Player_01" maxlength="15" required>
+                <button onclick="definirJogador()">Entrar no Arcade</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="home-screen" class="screen hidden">
+        <header>
+            <div class="user-info">
+                <span id="user-display-name">Jogador: </span>
+            </div>
+            <h1>🎮 ArcadeCentral Mega</h1>
+            <button class="btn-logout" onclick="mudarNickname()">Mudar Nick</button>
+        </header>
+
+        <main>
+            <section class="catalog">
+                <h2>Selecione um Jogo</h2>
+                <div class="game-grid">
+                    <div class="game-card">
+                        <h3>🐍 Jogo da Cobrinha</h3>
+                        <p>Arena ampliada para 450x450!</p>
+                        <div class="controls-badge">🎮 Controles: Setas do Teclado</div>
+                        <button onclick="iniciarJogo('snake')">Jogar</button>
+                    </div>
+                    <div class="game-card">
+                        <h3>💣 Campo Minado</h3>
+                        <p>Grade 12x12 contendo 40 minas escondidas.</p>
+                        <div class="controls-badge">🎮 Controles: Clique Esquerdo (Mouse)</div>
+                        <button onclick="iniciarJogo('mines')">Jogar</button>
+                    </div>
+                    <div class="game-card">
+                        <h3>👾 Space Invaders Pro</h3>
+                        <p>Defenda a base contra hordas que surgem a cada 10 segundos!</p>
+                        <div class="controls-badge">🎮 Controles: Segurar Setas (Esq/Dir) e Espaço para Atirar</div>
+                        <button onclick="iniciarJogo('invaders')">Jogar</button>
+                    </div>
+                    <div class="game-card">
+                        <h3>🟡 Pacman Loop</h3>
+                        <p>Paredes reais, movimentação aleatória dos fantasmas e modo infinito a partir da Fase 3!</p>
+                        <div class="controls-badge">🎮 Controles: Setas do Teclado</div>
+                        <button onclick="iniciarJogo('pacman')">Jogar</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <header>
+            <button onclick="voltarParaHome()">⬅ Voltar ao Catálogo</button>
+            <h2 id="game-title">Nome do Jogo</h2>
+            <div></div>
+        </header>
+
+        <main class="game-area-container">
+            <div id="game-arena">
+                <div id="game-instructions">Regras aqui.</div>
+                <button id="btn-start-game" onclick="comecarPartida()">Começar Partida</button>
+                
+                <div id="game-play-zone" class="hidden">
+                    <p class="game-stats">Pontuação Atual: <span id="game-current-score">0</span></p>
+                    <div id="canvas-container">
+                        </div>
+                </div>
+            </div>
+
+            <section class="game-ranking">
+                <h3>🏆 Melhores Pontuações</h3>
+                <table id="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Jogador</th>
+                            <th>Pontuação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body">
+                        </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
