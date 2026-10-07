@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Dominó</title>
+
+    <link rel="stylesheet" href="domino.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🁫 Dominó</h1>
+
+        <div class="placar">
+            <span>Você: <strong id="scorePlayer">0</strong></span>
+            <span>Computador: <strong id="scoreComputer">0</strong></span>
+        </div>
+
+        <div id="mesa" class="mesa">
+            <p id="mensagem">Sua vez!</p>
+        </div>
+
+        <div class="area-computador">
+            <h2>Computador</h2>
+            <div id="computerHand" class="mao"></div>
+        </div>
+
+        <div class="controles">
+            <button id="passButton">Passar</button>
+            <button id="newGameButton">Novo Jogo</button>
+        </div>
+
+        <div class="area-jogador">
+            <h2>Suas peças</h2>
+            <div id="playerHand" class="mao"></div>
+        </div>
+
+    </div>
+
+    <script src="domino.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f2027,
+            #203a43,
+            #2c5364
+        );
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: white;
+}
+
+.game {
+    width: 95%;
+
+    max-width: 550px;
+
+    text-align: center;
+
+    padding: 20px;
+}
+
+h1 {
+    font-size: 38px;
+
+    margin-bottom: 15px;
+
+    color: #65ff70;
+
+    text-shadow:
+        0 0 10px rgba(0,255,50,.4);
+}
+
+
+/* PLACAR */
+
+.info {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 40px;
+
+    margin-bottom: 15px;
+
+    font-size: 18px;
+}
+
+.info strong {
+    color: #65ff70;
+}
+
+
+/* ÁREA DO JOGO */
+
+.game-container {
+    position: relative;
+
+    width: min(90vw, 400px);
+
+    aspect-ratio: 1 / 1;
+
+    margin: auto;
+}
+
+
+/* CANVAS */
+
+canvas {
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    background: #071b0d;
+
+    border: 5px solid #1aff4c;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 20px rgba(0,255,50,.3);
+}
+
+
+/* GAME OVER */
+
+.game-over {
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(0,0,0,.85);
+
+    border-radius: 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.game-over h2 {
+    font-size: 32px;
+
+    color: #ff5252;
+}
+
+.game-over p {
+    font-size: 20px;
+}
+
+
+/* ESCONDER */
+
+.hidden {
+    display: none;
+}
+
+
+/* MENSAGEM */
+
+#message {
+    margin: 15px 0;
+
+    color: #ddd;
+
+    font-size: 16px;
+}
+
+
+/* CONTROLES */
+
+.controls {
+    width: 220px;
+
+    margin: 15px auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+.controls button {
+    width: 65px;
+
+    height: 55px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #183d24;
+
+    color: white;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.controls button:hover {
+    background: #2a683b;
+
+    transform: scale(1.05);
+}
+
+.controls button:active {
+    transform: scale(.9);
+}
+
+.controls .empty {
+    visibility: hidden;
+}
+
+
+/* BOTÃO COMEÇAR */
+
+.start {
+    padding: 12px 30px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #2ee66b;
+
+    color: #06220d;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.start:hover {
+    background: #6cff98;
+
+    transform: scale(1.05);
+}
+
+
+/* CELULAR */
+
+@media (max-width: 500px) {
+
+    h1 {
+        font-size: 30px;
+    }
+
+    .info {
+        gap: 20px;
+
+        font-size: 16px;
+    }
+
+    .controls {
+        width: 200px;
+    }
+
+    .controls button {
+        width: 58px;
+
+        height: 50px;
+    }
+
+}

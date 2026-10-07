@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO</title>
+
+    <link rel="stylesheet" href="uno.css">
+</head>
+
+<body>
+
+    <div class="game">
+
+        <h1>UNO</h1>
+
+        <div class="score">
+            <span>Você: <b id="playerScore">0</b></span>
+            <span>Computador: <b id="computerScore">0</b></span>
+        </div>
+
+        <!-- COMPUTADOR -->
+        <section class="computer-area">
+            <h2>Computador</h2>
+            <div id="computerHand" class="hand"></div>
+        </section>
+
+        <!-- MESA -->
+        <section class="table">
+
+            <p id="message">Sua vez!</p>
+
+            <div class="center-cards">
+
+                <div id="deckCard" class="card back">
+                    UNO
+                </div>
+
+                <div id="currentCard"></div>
+
+            </div>
+
+        </section>
+
+        <!-- JOGADOR -->
+        <section class="player-area">
+
+            <h2>Suas cartas</h2>
+
+            <div id="playerHand" class="hand"></div>
+
+        </section>
+
+        <!-- BOTÕES -->
+        <div class="buttons">
+
+            <button id="drawButton">
+                Comprar carta
+            </button>
+
+            <button id="unoButton">
+                UNO!
+            </button>
+
+            <button id="newGameButton">
+                Novo jogo
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="uno.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Jogo da Memória</title>
+
+    <link rel="stylesheet" href="memoria.css">
+</head>
+
+<body>
+
+    <div class="game">
+
+        <h1>🧠 Jogo da Memória</h1>
+
+        <div class="info">
+
+            <div>
+                ⏱️ Tempo:
+                <span id="time">00:00</span>
+            </div>
+
+            <div>
+                🎯 Movimentos:
+                <span id="moves">0</span>
+            </div>
+
+            <div>
+                ⭐ Pontos:
+                <span id="score">0</span>
+            </div>
+
+        </div>
+
+
+        <div id="board" class="board"></div>
+
+
+        <div class="message">
+
+            <p id="message">
+                Encontre todos os pares!
+            </p>
+
+            <button id="restartButton">
+                🔄 Novo Jogo
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="memoria.js"></script>
+
+</body>
+</html>

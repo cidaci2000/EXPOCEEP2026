@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paciência</title>
+
+    <link rel="stylesheet" href="paciencia.css">
+</head>
+
+<body>
+
+    <main class="game">
+
+        <h1>♠ Paciência</h1>
+
+        <div class="top">
+
+            <div class="deck-area">
+
+                <div id="stock" class="pile">
+                    🂠
+                </div>
+
+                <div id="waste" class="pile"></div>
+
+            </div>
+
+            <div class="foundations">
+
+                <div class="foundation" data-suit="♥"></div>
+                <div class="foundation" data-suit="♦"></div>
+                <div class="foundation" data-suit="♣"></div>
+                <div class="foundation" data-suit="♠"></div>
+
+            </div>
+
+        </div>
+
+
+        <div id="tableau" class="tableau"></div>
+
+
+        <div class="bottom">
+
+            <button id="newGame">
+                🔄 Novo jogo
+            </button>
+
+            <span id="moves">
+                Movimentos: 0
+            </span>
+
+        </div>
+
+        <p id="message">
+            Organize todas as cartas!
+        </p>
+
+    </main>
+
+
+    <script src="paciencia.js"></script>
+
+</body>
+</html>

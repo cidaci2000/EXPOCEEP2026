@@ -1,0 +1,418 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        radial-gradient(
+            circle,
+            #08783d,
+            #034522
+        );
+
+    color: white;
+
+    overflow-x: hidden;
+}
+
+.game {
+    width: 95%;
+    max-width: 1200px;
+
+    margin: auto;
+
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+
+    font-size: 42px;
+
+    margin-bottom: 20px;
+
+    color: #ffe082;
+
+    text-shadow:
+        0 3px 8px rgba(0,0,0,.5);
+}
+
+
+/* PARTE SUPERIOR */
+
+.top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    margin-bottom: 25px;
+}
+
+.deck-area {
+    display: flex;
+
+    gap: 15px;
+}
+
+.pile,
+.foundation {
+    width: 80px;
+
+    height: 110px;
+
+    border-radius: 9px;
+
+    border: 2px solid rgba(255,255,255,.6);
+
+    position: relative;
+}
+
+
+/* BARALHO */
+
+#stock {
+    background:
+        linear-gradient(
+            135deg,
+            #c62828,
+            #8e0000
+        );
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 42px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 10px rgba(0,0,0,.35);
+}
+
+
+/* DESCARTE */
+
+#waste {
+    background:
+        rgba(0,0,0,.15);
+}
+
+
+/* FUNDAÇÕES */
+
+.foundations {
+    display: flex;
+
+    gap: 10px;
+}
+
+.foundation {
+    background:
+        rgba(255,255,255,.12);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    color: rgba(255,255,255,.5);
+
+    font-size: 35px;
+}
+
+.foundation[data-suit="♥"],
+.foundation[data-suit="♦"] {
+    color: rgba(255,100,100,.7);
+}
+
+
+/* TABULEIRO */
+
+.tableau {
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    gap: 12px;
+
+    align-items: start;
+}
+
+
+/* COLUNA */
+
+.column {
+    min-height: 450px;
+
+    position: relative;
+}
+
+
+/* CARTA */
+
+.card {
+    width: 80px;
+
+    height: 110px;
+
+    border-radius: 9px;
+
+    background: white;
+
+    color: #111;
+
+    border: 2px solid #222;
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    padding: 7px;
+
+    font-weight: bold;
+
+    font-size: 23px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 7px rgba(0,0,0,.35);
+
+    user-select: none;
+
+    transition:
+        transform .15s,
+        box-shadow .15s;
+}
+
+.card:hover {
+    box-shadow:
+        0 8px 14px rgba(0,0,0,.5);
+}
+
+.card.red {
+    color: #d62828;
+}
+
+.card.black {
+    color: #111;
+}
+
+
+/* VERSO */
+
+.card.face-down {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #174ea6,
+            #174ea6 7px,
+            #0d47a1 7px,
+            #0d47a1 14px
+        );
+
+    border: 3px solid white;
+
+    color: transparent;
+
+    cursor: pointer;
+}
+
+.card.face-down::after {
+    content: "★";
+
+    color: white;
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 35px;
+}
+
+
+/* CARTA SELECIONADA */
+
+.card.selected {
+    outline: 4px solid #ffd54f;
+
+    transform:
+        translateX(-50%)
+        translateY(-5px);
+}
+
+
+/* CANTO DA CARTA */
+
+.card .top-left {
+    align-self: flex-start;
+}
+
+.card .center {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 38px;
+}
+
+.card .bottom-right {
+    align-self: flex-end;
+
+    transform: rotate(180deg);
+}
+
+
+/* FUNDO DAS CARTAS NA FOUNDATION/WASTE */
+
+.pile .card,
+.foundation .card {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+}
+
+
+/* BOTÕES */
+
+.bottom {
+    margin-top: 30px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 25px;
+}
+
+button {
+    padding: 12px 25px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #ffd54f;
+
+    color: #222;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+button:hover {
+    background: #ffe68a;
+
+    transform: scale(1.05);
+}
+
+#moves {
+    font-size: 17px;
+
+    font-weight: bold;
+}
+
+#message {
+    text-align: center;
+
+    margin-top: 15px;
+
+    color: #ffe082;
+
+    font-weight: bold;
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 800px) {
+
+    .game {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    .top {
+        flex-direction: column;
+
+        gap: 15px;
+
+        align-items: center;
+    }
+
+    .tableau {
+        gap: 3px;
+    }
+
+    .card {
+        width: 48px;
+
+        height: 75px;
+
+        font-size: 14px;
+
+        padding: 4px;
+    }
+
+    .card .center {
+        font-size: 24px;
+    }
+
+    .pile,
+    .foundation {
+        width: 60px;
+
+        height: 80px;
+    }
+
+    .foundation {
+        font-size: 25px;
+    }
+
+    .column {
+        min-height: 400px;
+    }
+
+}

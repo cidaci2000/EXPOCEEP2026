@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        /* ===== LOGIN ===== */
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.6s ease;
+        }
+
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #e94560, #f9a826, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-container p.subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #e94560, #f9a826);
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 12px;
+            min-height: 18px;
+        }
+
+        /* ===== ARCADE ===== */
+        .arcade-container {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .arcade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .arcade-header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #e94560, #f9a826, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #f9a826);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        .user-info span {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .btn-logout {
+            padding: 10px 18px;
+            border: 1px solid rgba(233, 69, 96, 0.5);
+            background: transparent;
+            color: #e94560;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(233, 69, 96, 0.15));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(233, 69, 96, 0.6);
+            box-shadow: 0 15px 35px rgba(233, 69, 96, 0.25);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-icon {
+            font-size: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-card h3 {
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-card p {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 500px) {
+            .arcade-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div class="login-container" id="loginScreen">
+        <h1>🕹️ Arcade Games</h1>
+        <p class="subtitle">Faça login para começar a jogar</p>
+
+        <div class="input-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" placeholder="Digite sua senha">
+        </div>
+
+        <button class="btn-login" id="loginBtn">Entrar</button>
+        <p class="error-msg" id="errorMsg"></p>
+    </div>
+
+    <!-- TELA DO ARCADE -->
+    <div class="arcade-container" id="arcadeScreen">
+        <div class="arcade-header">
+            <h1>🕹️ Arcade Games</h1>
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">U</div>
+                <span>Olá, <strong id="userName">Jogador</strong>!</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+
+        <div class="games-grid">
+            <a href="uno.html" class="game-card">
+                <div class="game-icon">🎴</div>
+                <h3>Uno</h3>
+                <p>O clássico jogo de cartas</p>
+            </a>
+
+            <a href="xadrez.html" class="game-card">
+                <div class="game-icon">♟️</div>
+                <h3>Xadrez</h3>
+                <p>Estratégia milenar</p>
+            </a>
+
+            <a href="cobrinha.html" class="game-card">
+                <div class="game-icon">🐍</div>
+                <h3>Cobrinha</h3>
+                <p>O clássico da nostalgia</p>
+            </a>
+
+            <a href="domino.html" class="game-card">
+                <div class="game-icon">🁣</div>
+                <h3>Dominó</h3>
+                <p>Encaixe as peças</p>
+            </a>
+
+            <a href="memoria.html" class="game-card">
+                <div class="game-icon">🧠</div>
+                <h3>Memória</h3>
+                <p>Teste sua memória</p>
+            </a>
+
+            <a href="paciencia.html" class="game-card">
+                <div class="game-icon">🃏</div>
+                <h3>Paciência</h3>
+                <p>Organize as cartas</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const loginScreen = document.getElementById('loginScreen');
+        const arcadeScreen = document.getElementById('arcadeScreen');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMsg = document.getElementById('errorMsg');
+        const userNameEl = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+
+        // Verifica se já há usuário logado ao carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('arcadeUser');
+            if (savedUser) {
+                showArcade(savedUser);
+            }
+        });
+
+        // Login
+        loginBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') passwordInput.focus();
+        });
+
+        function handleLogin() {
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value.trim();
+
+            errorMsg.textContent = '';
+
+            if (!user) {
+                errorMsg.textContent = 'Por favor, informe um usuário.';
+                return;
+            }
+            if (!pass) {
+                errorMsg.textContent = 'Por favor, informe uma senha.';
+                return;
+            }
+            if (pass.length < 3) {
+                errorMsg.textContent = 'A senha deve ter ao menos 3 caracteres.';
+                return;
+            }
+
+            // Simulação de login (aceita qualquer usuário/senha válidos)
+            localStorage.setItem('arcadeUser', user);
+            showArcade(user);
+        }
+
+        function showArcade(user) {
+            userNameEl.textContent = user;
+            userAvatar.textContent = user.charAt(0).toUpperCase();
+            loginScreen.style.display = 'none';
+            arcadeScreen.style.display = 'block';
+            usernameInput.value = '';
+            passwordInput.value = '';
+        }
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('arcadeUser');
+            arcadeScreen.style.display = 'none';
+            loginScreen.style.display = 'block';
+        });
+    </script>
+
+</body>
+</html>

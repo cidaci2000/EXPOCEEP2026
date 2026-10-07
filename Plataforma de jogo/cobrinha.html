@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Jogo da Cobrinha</title>
+
+    <link rel="stylesheet" href="cobrinha.css">
+</head>
+
+<body>
+
+    <div class="game">
+
+        <h1>🐍 Jogo da Cobrinha</h1>
+
+        <div class="info">
+
+            <div>
+                Pontos:
+                <strong id="score">0</strong>
+            </div>
+
+            <div>
+                Recorde:
+                <strong id="highScore">0</strong>
+            </div>
+
+        </div>
+
+
+        <div class="game-container">
+
+            <canvas
+                id="gameCanvas"
+                width="400"
+                height="400">
+            </canvas>
+
+            <div
+                id="gameOver"
+                class="game-over hidden">
+
+                <h2>💥 Game Over!</h2>
+
+                <p>
+                    Pontuação:
+                    <strong id="finalScore">0</strong>
+                </p>
+
+                <button id="restartButton">
+                    🔄 Jogar novamente
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <p id="message">
+            Use as setas para começar!
+        </p>
+
+
+        <!-- CONTROLES PARA CELULAR -->
+
+        <div class="controls">
+
+            <button class="empty"></button>
+
+            <button data-direction="up">
+                ⬆️
+            </button>
+
+            <button class="empty"></button>
+
+
+            <button data-direction="left">
+                ⬅️
+            </button>
+
+            <button data-direction="down">
+                ⬇️
+            </button>
+
+            <button data-direction="right">
+                ➡️
+            </button>
+
+        </div>
+
+
+        <button
+            id="startButton"
+            class="start">
+            ▶️ Começar
+        </button>
+
+    </div>
+
+
+    <script src="cobrinha.js"></script>
+
+</body>
+</html>
