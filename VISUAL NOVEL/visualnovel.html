@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Novel - O Encontro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a0033 0%, #0d001a 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #game {
+      position: relative;
+      width: 960px;
+      height: 640px;
+      max-width: 100vw;
+      max-height: 100vh;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(168, 85, 247, 0.3);
+      border: 2px solid rgba(192, 192, 192, 0.4);
+    }
+
+    /* Imagem de Fundo com Transição */
+    #background {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.8s ease-in-out, filter 0.5s ease;
+      z-index: 1;
+    }
+
+    /* Vinheta roxa sutil */
+    #background::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(26, 0, 51, 0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* Sprite da Personagem */
+    #character-container {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      height: 88%;
+      width: auto;
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 30px rgba(168, 85, 247, 0.6));
+    }
+
+    #character-container.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #character-img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    }
+
+    /* Painel Superior (Status) */
+    #status-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .badge {
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.9), rgba(26, 0, 51, 0.95));
+      backdrop-filter: blur(10px);
+      padding: 8px 18px;
+      border-radius: 20px;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid rgba(192, 192, 192, 0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.5px;
+    }
+
+    .badge span {
+      color: #c084fc;
+    }
+
+    /* Caixa de Diálogo */
+    #dialogue-box {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: linear-gradient(145deg, rgba(26, 0, 51, 0.95), rgba(13, 0, 26, 0.98));
+      border: 2px solid rgba(192, 192, 192, 0.5);
+      border-radius: 14px;
+      padding: 24px 30px;
+      color: #f1f5f9;
+      min-height: 165px;
+      backdrop-filter: blur(16px);
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(168, 85, 247, 0.3),
+        inset 0 0 20px rgba(168, 85, 247, 0.05);
+      z-index: 4;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #dialogue-box:hover {
+      border-color: rgba(168, 85, 247, 0.7);
+    }
+
+    #speaker {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(180deg, #ffffff 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+    }
+
+    #text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    #cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: linear-gradient(180deg, #c084fc, #a855f7);
+      margin-left: 5px;
+      vertical-align: middle;
+      animation: blink 0.8s infinite;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    #click-hint {
+      position: absolute;
+      bottom: 12px;
+      right: 24px;
+      color: #c084fc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0.9;
+      animation: bounce 1.2s infinite;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* Tela de Escolhas */
+    #choices {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      background: rgba(13, 0, 26, 0.8);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+      padding: 20px;
+    }
+
+    #choices.active {
+      display: flex;
+    }
+
+    .choice-btn {
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.95), rgba(26, 0, 51, 0.98));
+      color: #f8fafc;
+      border: 2px solid rgba(192, 192, 192, 0.4);
+      border-radius: 12px;
+      padding: 16px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .choice-btn:hover::before {
+      left: 100%;
+    }
+
+    .choice-btn:hover {
+      background: linear-gradient(145deg, #7c3aed, #a855f7);
+      color: #fff;
+      border-color: #c084fc;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 8px 25px rgba(168, 85, 247, 0.5),
+        0 0 20px rgba(192, 192, 192, 0.3);
+    }
+
+    /* Botão de voltar ao menu */
+    #back-btn {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.9), rgba(26, 0, 51, 0.95));
+      border: 1px solid rgba(192, 192, 192, 0.4);
+      color: #c084fc;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    #back-btn:hover {
+      border-color: #c084fc;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    }
+
+    #back-btn.visible {
+      display: block;
+    }
+
+    /* Efeito de transição flash roxa */
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.8), transparent);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      transition: opacity 0.4s ease;
+    }
+
+    #flash.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game">
+  <div id="background"></div>
+  
+  <div id="character-container">
+    <img id="character-img" src="" alt="Personagem">
+  </div>
+
+  <a href="index.html" id="back-btn">← MENU</a>
+
+  <div id="status-bar">
+    <div class="badge" id="chapter-tag">Prólogo</div>
+    <div class="badge">💜 Afinidade: <span id="affinity">0</span></div>
+  </div>
+
+  <div id="dialogue-box">
+    <div id="speaker"></div>
+    <div id="text"></div>
+    <div id="click-hint">CLIQUE OU ESPAÇO ▶</div>
+  </div>
+
+  <div id="choices"></div>
+  <div id="flash"></div>
+</div>
+
+<script>
+/* ============================================================
+   ASSETS DE IMAGEM
+   ============================================================ */
+const IMAGES = {
+  // Fundos
+  bg_library: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80',
+  bg_rain: 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1200&q=80',
+  bg_cafe: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80',
+  bg_sunset: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+  bg_night: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=1200&q=80',
+  bg_corridor: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=1200&q=80',
+
+  // Sprites de Personagem
+  char_neutral: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+  char_smile: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80',
+  char_sad: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+  char_surprised: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80'
+};
+
+/* ============================================================
+   ESTADO DO JOGO
+   ============================================================ */
+const state = {
+  affinity: 0,
+  currentNode: 'start'
+};
+
+/* ============================================================
+   ROTEIRO - O ENCONTRO
+   ============================================================ */
+const story = {
+  start: {
+    speaker: 'Narrador',
+    text: 'A chuva começou sem aviso prévio. As gotas pesadas batiam no vidro da biblioteca acadêmica, criando uma melodia hipnótica que ecoava pelos corredores vazios.',
+    bg: IMAGES.bg_library,
+    char: null,
+    chapter: 'Prólogo',
+    next: 'passo_2'
+  },
+  passo_2: {
+    speaker: 'Narrador',
+    text: 'Você fecha o livro que estava lendo e olha pela janela. O céu escuro e as ruas molhadas indicam que a tempestade não vai passar tão cedo.',
+    bg: IMAGES.bg_library,
+    char: null,
+    chapter: 'Prólogo',
+    next: 'passo_3'
+  },
+  passo_3: {
+    speaker: 'Narrador',
+    text: 'Ao se levantar para guardar seus materiais, você nota uma silhueta familiar na saída do edifício. Uma garota observava a tempestade com o olhar preocupado, segurando alguns livros contra o peito.',
+    bg: IMAGES.bg_corridor,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 1 — O Encontro',
+    next: 'passo_4'
+  },
+  passo_4: {
+    speaker: 'Sofia',
+    text: 'Ah... que azar. Esqueci meu guarda-chuva no armário e o campus fecha em dez minutos.',
+    bg: IMAGES.bg_corridor,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 1 — O Encontro',
+    choices: [
+      { text: '🌸 Oferecer dividir o seu guarda-chuva', next: 'passo_5_gentil', affinity: 2 },
+      { text: '☕ Convidá-la para tomar um café no saguão', next: 'passo_5_cafe', affinity: 1 },
+      { text: '❄️ Apenas lamentar e seguir seu caminho', next: 'passo_5_frio', affinity: -2 }
+    ]
+  },
+  
+  // ===== RAMO 1: GENTIL (Guarda-chuva) =====
+  passo_5_gentil: {
+    speaker: 'Você',
+    text: 'Eu tenho um guarda-chuva. Podemos dividir, se você quiser.',
+    bg: IMAGES.bg_rain,
+    char: IMAGES.char_surprised,
+    chapter: 'Capítulo 2 — Sob a Chuva',
+    next: 'passo_6_gentil'
+  },
+  passo_6_gentil: {
+    speaker: 'Sofia',
+    text: 'Sério?! Muito obrigada! Eu estava preocupada em molhar estes arquivos da pesquisa... Eles são importantes para minha tese.',
+    bg: IMAGES.bg_rain,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 2 — Sob a Chuva',
+    next: 'passo_7_caminhada'
+  },
+  passo_7_caminhada: {
+    speaker: 'Narrador',
+    text: 'Vocês caminham juntos sob o guarda-chuva. O som constante da chuva cria um clima acolhedor entre vocês, e os ombros quase se tocam a cada passo.',
+    bg: IMAGES.bg_rain,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 2 — Sob a Chuva',
+    next: 'passo_8_conversa'
+  },
+  
+  // ===== RAMO 2: CAFÉ =====
+  passo_5_cafe: {
+    speaker: 'Você',
+    text: 'Que tal esperarmos passar no café do saguão? O campus pode fechar, mas o café fica aberto até mais tarde.',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_surprised,
+    chapter: 'Capítulo 2 — Café Quente',
+    next: 'passo_6_cafe'
+  },
+  passo_6_cafe: {
+    speaker: 'Sofia',
+    text: 'Acho uma ótima ideia. Um café quente ajudaria bastante a passar o tempo... e a aquecer este frio.',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 2 — Café Quente',
+    next: 'passo_8_conversa'
+  },
+  
+  // ===== RAMO 3: FRIO =====
+  passo_5_frio: {
+    speaker: 'Você',
+    text: 'Pois é... espero que a chuva passe logo. Boa sorte.',
+    bg: IMAGES.bg_rain,
+    char: IMAGES.char_sad,
+    chapter: 'Capítulo 2 — Silêncio',
+    next: 'passo_6_frio'
+  },
+  passo_6_frio: {
+    speaker: 'Sofia',
+    text: 'Ah... entendo. Terei que esperar a chuva diminuir então. Boa noite...',
+    bg: IMAGES.bg_rain,
+    char: IMAGES.char_sad,
+    chapter: 'Capítulo 2 — Silêncio',
+    next: 'final_frio'
+  },
+  
+  // ===== DESENVOLVIMENTO COMUM =====
+  passo_8_conversa: {
+    speaker: 'Sofia',
+    text: 'A propósito, eu me chamo Sofia. Estou no último ano de História. E você? Também estuda aqui?',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 3 — Apresentações',
+    choices: [
+      { text: '📚 Contar sobre seus projetos e paixões acadêmicas', next: 'passo_9_profundo', affinity: 2 },
+      { text: '😄 Fazer uma brincadeira leve sobre a rotina de estudos', next: 'passo_9_descontraido', affinity: 1 },
+      { text: '🤐 Responder de forma monossilábica', next: 'passo_9_monossilabo', affinity: -1 }
+    ]
+  },
+  passo_9_profundo: {
+    speaker: 'Sofia',
+    text: 'Isso é fascinante! É raro encontrar pessoas tão apaixonadas pelo que estudam. A maioria só quer terminar logo o curso...',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_surprised,
+    chapter: 'Capítulo 3 — Apresentações',
+    next: 'passo_10_troca'
+  },
+  passo_9_descontraido: {
+    speaker: 'Sofia',
+    text: 'Haha! É verdade, a vida universitária tem seus momentos caóticos. Semana passada eu esqueci uma prova inteira por causa de um café...',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 3 — Apresentações',
+    next: 'passo_10_troca'
+  },
+  passo_9_monossilabo: {
+    speaker: 'Sofia',
+    text: 'Ah... sim. Entendi. Você é bem quieto, não é?',
+    bg: IMAGES.bg_cafe,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 3 — Apresentações',
+    next: 'passo_10_troca'
+  },
+  
+  // ===== TRANSIÇÃO =====
+  passo_10_troca: {
+    speaker: 'Narrador',
+    text: 'A conversa flui naturalmente entre vocês. Vocês descobrem interesses em comum e riem juntos de histórias universitárias. O tempo parece passar mais rápido do que deveria.',
+    bg: IMAGES.bg_sunset,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 4 — Pôr do Sol',
+    next: 'passo_11_despedida'
+  },
+  passo_11_despedida: {
+    speaker: 'Narrador',
+    text: 'Lentamente, a tempestade cessa, dando lugar a um belo pôr do sol alaranjado que se reflete nas poças d\'água. Sofia olha para fora e suspira.',
+    bg: IMAGES.bg_sunset,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 4 — Pôr do Sol',
+    next: 'passo_12_contatos'
+  },
+  passo_12_contatos: {
+    speaker: 'Sofia',
+    text: 'A chuva finalmente parou... Foi muito agradável passar esse tempo com você. Obrigada por me acompanhar.',
+    bg: IMAGES.bg_sunset,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 4 — Pôr do Sol',
+    choices: [
+      { text: '💜 Pedir o número dela para estudarem juntos novamente', next: 'final_bom', affinity: 2 },
+      { text: '🤝 Apenas se despedir gentilmente', next: 'final_neutro', affinity: 0 }
+    ]
+  },
+  
+  // ===== FINAIS =====
+  final_bom: {
+    speaker: 'Você',
+    text: 'Sofia, que tal trocarmos contatos? Seria legal continuarmos essa conversa outro dia... quem sabe estudando juntos na biblioteca?',
+    bg: IMAGES.bg_sunset,
+    char: IMAGES.char_surprised,
+    chapter: 'Epílogo — Um Novo Começo',
+    next: 'final_bom_2'
+  },
+  final_bom_2: {
+    speaker: 'Sofia',
+    text: 'Eu adoraria! Aqui, deixa eu anotar meu número. Promete que me chama, hein?',
+    bg: IMAGES.bg_sunset,
+    char: IMAGES.char_smile,
+    chapter: 'Epílogo — Um Novo Começo',
+    next: 'final_bom_3'
+  },
+  final_bom_3: {
+    speaker: 'Narrador',
+    text: 'Sofia sorri e entrega um papelzinho com seu número. Aquele encontro inesperado sob a chuva marcou o início de algo especial. Você a observa se afastar, sentindo que aquele não seria o último encontro de vocês.',
+    bg: IMAGES.bg_sunset,
+    char: null,
+    chapter: 'Epílogo — Um Novo Começo',
+    next: 'fim'
+  },
+  final_neutro: {
+    speaker: 'Narrador',
+    text: 'Vocês se despedem com um aceno amigável. Foi um momento agradável, embora breve. Você volta para casa refletindo sobre o encontro, mas sem saber se voltará a vê-la novamente.',
+    bg: IMAGES.bg_night,
+    char: null,
+    chapter: 'Epílogo — Um Adeus Gentil',
+    next: 'fim'
+  },
+  final_frio: {
+    speaker: 'Narrador',
+    text: 'Você foi embora sozinho sob a chuva. No dia seguinte, você não a encontrou mais na biblioteca. Às vezes, pequenas decisões mudam o curso de tudo.',
+    bg: IMAGES.bg_night,
+    char: null,
+    chapter: 'Epílogo — O Silêncio',
+    next: 'fim'
+  },
+  fim: {
+    speaker: 'Narrador',
+    text: 'FIM. Obrigado por jogar! Clique para reiniciar a história.',
+    bg: IMAGES.bg_night,
+    char: null,
+    chapter: 'Conclusão',
+    next: 'start',
+    isEnd: true
+  }
+};
+
+/* ============================================================
+   ELEMENTOS DO DOM
+   ============================================================ */
+const bgEl = document.getElementById('background');
+const charContainerEl = document.getElementById('character-container');
+const charImgEl = document.getElementById('character-img');
+const speakerEl = document.getElementById('speaker');
+const textEl = document.getElementById('text');
+const choicesEl = document.getElementById('choices');
+const affinityEl = document.getElementById('affinity');
+const chapterTagEl = document.getElementById('chapter-tag');
+const hintEl = document.getElementById('click-hint');
+const gameEl = document.getElementById('game');
+const backBtn = document.getElementById('back-btn');
+const flashEl = document.getElementById('flash');
+
+/* ============================================================
+   SISTEMA DE DIGITAÇÃO
+   ============================================================ */
+let typing = false;
+let typeInterval = null;
+let currentText = '';
+let currentNext = null;
+
+function typeWriter(text, callback) {
+  typing = true;
+  currentText = text;
+  textEl.innerHTML = '';
+  
+  let i = 0;
+  clearInterval(typeInterval);
+
+  typeInterval = setInterval(() => {
+    if (i < text.length) {
+      textEl.textContent = text.substring(0, i + 1);
+      textEl.appendChild(createCursor());
+      i++;
+    } else {
+      completeTyping(callback);
+    }
+  }, 20);
+}
+
+function createCursor() {
+  const cursor = document.createElement('span');
+  cursor.id = 'cursor';
+  return cursor;
+}
+
+function completeTyping(callback) {
+  clearInterval(typeInterval);
+  textEl.textContent = currentText;
+  textEl.appendChild(createCursor());
+  typing = false;
+  if (callback) callback();
+}
+
+function skipTyping() {
+  const node = story[state.currentNode];
+  completeTyping(() => {
+    if (node.choices) showChoices(node.choices);
+  });
+}
+
+/* ============================================================
+   EFEITO DE FLASH
+   ============================================================ */
+function flash() {
+  flashEl.classList.add('active');
+  setTimeout(() => flashEl.classList.remove('active'), 300);
+}
+
+/* ============================================================
+   GERENCIAMENTO DE CENA
+   ============================================================ */
+function goToNode(nodeId) {
+  const node = story[nodeId];
+  if (!node) return;
+
+  state.currentNode = nodeId;
+
+  // Atualiza Fundo
+  if (node.bg) {
+    bgEl.style.backgroundImage = `url('${node.bg}')`;
+  }
+
+  // Atualiza Personagem
+  if (node.char) {
+    charImgEl.src = node.char;
+    charContainerEl.classList.add('show');
+  } else {
+    charContainerEl.classList.remove('show');
+  }
+
+  // Capítulos e Interface
+  chapterTagEl.textContent = node.chapter || 'Visual Novel';
+  speakerEl.textContent = node.speaker || '';
+  choicesEl.classList.remove('active');
+  
+  // Mostra botão de voltar no final
+  if (node.isEnd) {
+    backBtn.classList.add('visible');
+  } else {
+    backBtn.classList.remove('visible');
+  }
+  
+  typeWriter(node.text, () => {
+    if (node.choices) showChoices(node.choices);
+  });
+
+  currentNext = node.next || null;
+  hintEl.style.display = node.choices ? 'none' : 'block';
+}
+
+/* ============================================================
+   SISTEMA DE ESCOLHAS
+   ============================================================ */
+function showChoices(choices) {
+  choicesEl.innerHTML = '';
+  choicesEl.classList.add('active');
+
+  choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.style.animation = `fadeIn 0.4s ease ${index * 0.1}s both`;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      choicesEl.classList.remove('active');
+      state.affinity += choice.affinity || 0;
+      affinityEl.textContent = state.affinity;
+      flash();
+      setTimeout(() => goToNode(choice.next), 200);
+    };
+    choicesEl.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   CONTROLES DE NAVEGAÇÃO
+   ============================================================ */
+function advanceStory() {
+  if (choicesEl.classList.contains('active')) return;
+
+  if (typing) {
+    skipTyping();
+    return;
+  }
+
+  if (currentNext) {
+    if (story[state.currentNode].isEnd) {
+      state.affinity = 0;
+      affinityEl.textContent = 0;
+      backBtn.classList.remove('visible');
+    }
+    flash();
+    setTimeout(() => goToNode(currentNext), 150);
+  }
+}
+
+gameEl.addEventListener('click', (e) => {
+  if (e.target.classList.contains('choice-btn')) return;
+  if (e.target === backBtn) return;
+  advanceStory();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (['Space', 'Enter', 'ArrowRight'].includes(e.code)) {
+    e.preventDefault();
+    advanceStory();
+  }
+});
+
+// Animação de fadeIn para escolhas
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+document.head.appendChild(style);
+
+// Inicialização
+goToNode('start');
+</script>
+
+</body>
+</html>

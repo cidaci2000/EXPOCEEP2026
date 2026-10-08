@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Novel - Capítulo 5: Depois da Chuva</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a0033 0%, #0d001a 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #game {
+      position: relative;
+      width: 960px;
+      height: 640px;
+      max-width: 100vw;
+      max-height: 100vh;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(168, 85, 247, 0.3);
+      border: 2px solid rgba(192, 192, 192, 0.4);
+    }
+
+    #background {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.8s ease-in-out, filter 0.5s ease;
+      z-index: 1;
+    }
+
+    #background::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(26, 0, 51, 0.65) 100%);
+      pointer-events: none;
+    }
+
+    #character-container {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      height: 88%;
+      width: auto;
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 30px rgba(168, 85, 247, 0.6));
+    }
+
+    #character-container.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #character-container.left {
+      left: 30%;
+    }
+
+    #character-container.right {
+      left: 70%;
+    }
+
+    #character-img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    }
+
+    #status-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .badge {
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.9), rgba(26, 0, 51, 0.95));
+      backdrop-filter: blur(10px);
+      padding: 8px 18px;
+      border-radius: 20px;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid rgba(192, 192, 192, 0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.5px;
+    }
+
+    .badge span {
+      color: #c084fc;
+    }
+
+    #dialogue-box {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: linear-gradient(145deg, rgba(26, 0, 51, 0.95), rgba(13, 0, 26, 0.98));
+      border: 2px solid rgba(192, 192, 192, 0.5);
+      border-radius: 14px;
+      padding: 24px 30px;
+      color: #f1f5f9;
+      min-height: 165px;
+      backdrop-filter: blur(16px);
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(168, 85, 247, 0.3),
+        inset 0 0 20px rgba(168, 85, 247, 0.05);
+      z-index: 4;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #dialogue-box:hover {
+      border-color: rgba(168, 85, 247, 0.7);
+    }
+
+    #speaker {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(180deg, #ffffff 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+    }
+
+    #text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    #cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: linear-gradient(180deg, #c084fc, #a855f7);
+      margin-left: 5px;
+      vertical-align: middle;
+      animation: blink 0.8s infinite;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    #click-hint {
+      position: absolute;
+      bottom: 12px;
+      right: 24px;
+      color: #c084fc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0.9;
+      animation: bounce 1.2s infinite;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    #choices {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      background: rgba(13, 0, 26, 0.8);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+      padding: 20px;
+    }
+
+    #choices.active {
+      display: flex;
+    }
+
+    .choice-btn {
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.95), rgba(26, 0, 51, 0.98));
+      color: #f8fafc;
+      border: 2px solid rgba(192, 192, 192, 0.4);
+      border-radius: 12px;
+      padding: 16px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      max-width: 540px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .choice-btn:hover::before {
+      left: 100%;
+    }
+
+    .choice-btn:hover {
+      background: linear-gradient(145deg, #7c3aed, #a855f7);
+      color: #fff;
+      border-color: #c084fc;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 8px 25px rgba(168, 85, 247, 0.5),
+        0 0 20px rgba(192, 192, 192, 0.3);
+    }
+
+    #back-btn {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      background: linear-gradient(145deg, rgba(45, 10, 78, 0.9), rgba(26, 0, 51, 0.95));
+      border: 1px solid rgba(192, 192, 192, 0.4);
+      color: #c084fc;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    #back-btn:hover {
+      border-color: #c084fc;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    }
+
+    #back-btn.visible {
+      display: block;
+    }
+
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.8), transparent);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+      transition: opacity 0.4s ease;
+    }
+
+    #flash.active {
+      opacity: 1;
+    }
+
+    /* Corações flutuantes */
+    .heart {
+      position: absolute;
+      color: #c084fc;
+      font-size: 1.5rem;
+      pointer-events: none;
+      animation: floatUp 3s ease-out forwards;
+      z-index: 15;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.8));
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.5);
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-200px) scale(1.2);
+      }
+    }
+
+    /* Transição de capítulo */
+    .chapter-title {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(13, 0, 26, 0.95);
+      z-index: 30;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .chapter-title.active {
+      opacity: 1;
+    }
+
+    .chapter-title h2 {
+      font-size: 2.5rem;
+      background: linear-gradient(180deg, #ffffff 0%, #c084fc 50%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+      margin-bottom: 10px;
+    }
+
+    .chapter-title p {
+      color: #c084fc;
+      letter-spacing: 6px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    .chapter-title .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c084fc, transparent);
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game">
+  <div id="background"></div>
+  
+  <div id="character-container">
+    <img id="character-img" src="" alt="Personagem">
+  </div>
+
+  <a href="index.html" id="back-btn">← MENU</a>
+
+  <div id="status-bar">
+    <div class="badge" id="chapter-tag">Capítulo 5</div>
+    <div class="badge">💜 Afinidade: <span id="affinity">0</span></div>
+  </div>
+
+  <div id="dialogue-box">
+    <div id="speaker"></div>
+    <div id="text"></div>
+    <div id="click-hint">CLIQUE OU ESPAÇO ▶</div>
+  </div>
+
+  <div id="choices"></div>
+  <div id="flash"></div>
+  <div class="chapter-title" id="chapter-title">
+    <h2>Capítulo 5</h2>
+    <div class="divider"></div>
+    <p>Depois da Chuva</p>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ASSETS DE IMAGEM
+   ============================================================ */
+const IMAGES = {
+  // Fundos
+  bg_apartment: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+  bg_cafe_morning: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80',
+  bg_campus_rain: 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?auto=format&fit=crop&w=1200&q=80',
+  bg_campus_sunny: 'https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&w=1200&q=80',
+  bg_park: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80',
+  bg_library_night: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=80',
+  bg_rooftop: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
+  bg_text_message: 'https://images.unsplash.com/photo-1611606063065-ee7946f0787a?auto=format&fit=crop&w=1200&q=80',
+
+  // Sprites de Personagem
+  char_neutral: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+  char_smile: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80',
+  char_sad: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+  char_surprised: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80',
+  char_blush: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=600&q=80',
+  char_thinking: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80'
+};
+
+/* ============================================================
+   ESTADO DO JOGO
+   ============================================================ */
+const state = {
+  affinity: 0,
+  currentNode: 'start'
+};
+
+/* ============================================================
+   ROTEIRO - CAPÍTULO 5: DEPOIS DA CHUVA
+   ============================================================ */
+const story = {
+  start: {
+    speaker: 'Narrador',
+    text: 'Dois dias se passaram desde o encontro sob a chuva. A vida acadêmica retomou seu ritmo habitual, mas algo parecia diferente. Seu celular vibrou com uma notificação.',
+    bg: IMAGES.bg_apartment,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'mensagem_1'
+  },
+  mensagem_1: {
+    speaker: 'Sofia',
+    text: '[MENSAGEM DE TEXTO] "Oi! Aqui é a Sofia... da chuva 🌧️ Lembra de mim? Consegui seu número com o pessoal do centro acadêmico, espero que não se importe."',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'mensagem_2'
+  },
+  mensagem_2: {
+    speaker: 'Sofia',
+    text: '[MENSAGEM DE TEXTO] "Ia te chamar pra tomar um café hoje à tarde, se estiver livre. Queria te agradecer direito pela ajuda com o guarda-chuva 😊"',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    choices: [
+      { text: '💜 Responder na hora: "Claro! Adoraria te ver de novo"', next: 'resposta_animada', affinity: 2 },
+      { text: '😌 Responder educadamente: "Oi Sofia! Pode sim, claro."', next: 'resposta_educada', affinity: 1 },
+      { text: '⏳ Deixar para responder mais tarde...', next: 'resposta_tardia', affinity: -1 }
+    ]
+  },
+  
+  // ===== RAMO 1: RESPOSTA ANIMADA =====
+  resposta_animada: {
+    speaker: 'Você',
+    text: '"Claro! Adoraria te ver de novo. Que tal às 15h no Café Central, aquele perto do campus?"',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'resposta_animada_2'
+  },
+  resposta_animada_2: {
+    speaker: 'Sofia',
+    text: '"Perfeito! 😄 Estarei lá. Ah, e... leva o guarda-chuva. As previsões dizem que pode chover de novo."',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_encontro'
+  },
+  
+  // ===== RAMO 2: RESPOSTA EDUCADA =====
+  resposta_educada: {
+    speaker: 'Você',
+    text: '"Oi Sofia! Claro que lembro. Pode sim, claro. Que horas você pensou?"',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'resposta_educada_2'
+  },
+  resposta_educada_2: {
+    speaker: 'Sofia',
+    text: '"Que tal 15h? No Café Central, aquele perto do campus. Se puder, leva o guarda-chuva, tá previsto chuva de novo."',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_encontro'
+  },
+  
+  // ===== RAMO 3: RESPOSTA TARDIA =====
+  resposta_tardia: {
+    speaker: 'Narrador',
+    text: 'Você deixou o celular de lado e só foi responder horas depois. A mensagem de Sofia já tinha sido visualizada há muito tempo.',
+    bg: IMAGES.bg_apartment,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'resposta_tardia_2'
+  },
+  resposta_tardia_2: {
+    speaker: 'Sofia',
+    text: '"Ah, sem problemas... Achei que talvez não quisesse mais falar comigo. Que tal amanhã então?"',
+    bg: IMAGES.bg_text_message,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_encontro'
+  },
+  
+  // ===== ENCONTRO NO CAFÉ =====
+  cafe_encontro: {
+    speaker: 'Narrador',
+    text: 'Você chega ao Café Central alguns minutos antes do horário. O lugar é aconchegante, com luzes âmbar e um cheiro inconfundível de café fresco. Sofia ainda não chegou.',
+    bg: IMAGES.bg_cafe_morning,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_chegada'
+  },
+  cafe_chegada: {
+    speaker: 'Narrador',
+    text: 'A porta se abre e Sofia entra, sacudindo o guarda-chuva molhado. Ela te avista e sorri, caminhando na sua direção.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_1'
+  },
+  cafe_conversa_1: {
+    speaker: 'Sofia',
+    text: 'Oi! Desculpa o atraso, a chuva resolveu voltar bem na hora que eu saí de casa. Espero que não tenha esperado muito.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    choices: [
+      { text: '☕ "Sem problema. Já pedi um café pra você, achei que fosse gostar."', next: 'cafe_cafe_pedido', affinity: 2 },
+      { text: '😊 "Acabei de chegar também. Vamos sentar?"', next: 'cafe_sentar', affinity: 1 },
+      { text: '😐 "Tudo bem. Vamos logo, tenho coisas pra fazer."', next: 'cafe_apressado', affinity: -2 }
+    ]
+  },
+  
+  // ===== SUB-RAMO: CAFÉ PEDIDO =====
+  cafe_cafe_pedido: {
+    speaker: 'Sofia',
+    text: 'Ah, sério? Você lembrou que eu gosto de café? Que fofo! Como sabia?',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_2'
+  },
+  
+  // ===== SUB-RAMO: SENTAR =====
+  cafe_sentar: {
+    speaker: 'Sofia',
+    text: 'Claro! Escolhi a mesa perto da janela, se não se importar. Adoro ver a chuva cair enquanto converso.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_2'
+  },
+  
+  // ===== SUB-RAMO: APRESSADO =====
+  cafe_apressado: {
+    speaker: 'Sofia',
+    text: 'Ah... claro, claro. Se estiver com pressa, podemos ser breves. Desculpa ter te chamado.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_sad,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_2'
+  },
+  
+  // ===== CONVERSA PRINCIPAL =====
+  cafe_conversa_2: {
+    speaker: 'Narrador',
+    text: 'Vocês se sentam e a conversa flui naturalmente. Sofia conta sobre sua pesquisa de História, sobre um diário antigo que encontrou no arquivo da universidade.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_3'
+  },
+  cafe_conversa_3: {
+    speaker: 'Sofia',
+    text: 'É fascinante... Esse diário pertencia a uma estudante da década de 1950. Ela escrevia sobre os sonhos dela, os medos... É como se eu pudesse ouvir a voz dela através do tempo.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_conversa_4'
+  },
+  cafe_conversa_4: {
+    speaker: 'Sofia',
+    text: 'Sabe... eu acho que a gente se conecta com as pessoas de formas estranhas. Como aquele dia da chuva. Se eu não tivesse esquecido o guarda-chuva, a gente talvez nunca tivesse se falado.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    choices: [
+      { text: '💜 "Eu também penso nisso. Foi sorte, não acha?"', next: 'cafe_conexao', affinity: 2 },
+      { text: '🤔 "Acho que foi destino, talvez."', next: 'cafe_destino', affinity: 2 },
+      { text: '😅 "É, coincidência engraçada."', next: 'cafe_coincidencia', affinity: 0 }
+    ]
+  },
+  
+  // ===== SUB-RAMO: CONEXÃO =====
+  cafe_conexao: {
+    speaker: 'Sofia',
+    text: 'Sorte... ou talvez algo mais. Eu não acredito muito em coincidências, sabe?',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_emocao'
+  },
+  
+  // ===== SUB-RAMO: DESTINO =====
+  cafe_destino: {
+    speaker: 'Sofia',
+    text: 'Destino... Eu gosto dessa palavra. Soa como se o universo tivesse nos empurrado um pro outro.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_emocao'
+  },
+  
+  // ===== SUB-RAMO: COINCIDÊNCIA =====
+  cafe_coincidencia: {
+    speaker: 'Sofia',
+    text: 'É... engraçada mesmo. Às vezes a vida tem dessas.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_emocao'
+  },
+  
+  // ===== MOMENTO DE EMOÇÃO =====
+  cafe_emocao: {
+    speaker: 'Narrador',
+    text: 'Um silêncio confortável se instala entre vocês. A chuva batia suavemente na janela. Sofia olha para o fundo da xícara e depois para você, com um olhar diferente.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_emocao_2'
+  },
+  cafe_emocao_2: {
+    speaker: 'Sofia',
+    text: 'Sabe... faz muito tempo que eu não me sinto tão à vontade com alguém assim. É estranho, mas é bom.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'cafe_decisao_final'
+  },
+  
+  // ===== DECISÃO FINAL =====
+  cafe_decisao_final: {
+    speaker: 'Narrador',
+    text: 'O café está acabando e a tarde começa a cair. Vocês precisam decidir o que fazer depois. Sofia espera por sua resposta.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_neutral,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    choices: [
+      { text: '🌧️ Convidá-la para caminhar na chuva com você', next: 'final_caminhada', affinity: 3 },
+      { text: '📚 Convidá-la para estudar com você na biblioteca', next: 'final_estudo', affinity: 1 },
+      { text: '👋 Dizer que precisa ir, mas que foi bom te ver', next: 'final_despedida', affinity: -1 }
+    ]
+  },
+  
+  // ===== FINAL 1: CAMINHADA NA CHUVA =====
+  final_caminhada: {
+    speaker: 'Você',
+    text: 'Sofia... que tal a gente caminhar um pouco? A chuva está leve agora, e eu tenho um guarda-chuva. Seria uma boa forma de fechar o ciclo.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_surprised,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_caminhada_2'
+  },
+  final_caminhada_2: {
+    speaker: 'Sofia',
+    text: 'Gostei da ideia. É como se a chuva tivesse nos trazido juntos de novo.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_caminhada_3'
+  },
+  final_caminhada_3: {
+    speaker: 'Narrador',
+    text: 'Vocês saem juntos sob o guarda-chuva. O parque está vazio, as folhas brilham com as gotas de água, e o ar tem aquele cheiro inconfundível de terra molhada. Sofia caminha perto de você, seus ombros se tocando.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_caminhada_4'
+  },
+  final_caminhada_4: {
+    speaker: 'Sofia',
+    text: 'Ei... eu estava pensando. Você gostaria de ir comigo ao arquivo da universidade amanhã? Quero te mostrar aquele diário de que falei.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_caminhada_5'
+  },
+  final_caminhada_5: {
+    speaker: 'Você',
+    text: 'Eu adoraria. Já estou curioso para conhecer essa história.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_caminhada_6'
+  },
+  final_caminhada_6: {
+    speaker: 'Sofia',
+    text: 'Então está combinado. E... obrigada por hoje. De verdade.',
+    bg: IMAGES.bg_park,
+    char: IMAGES.char_blush,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim_caminhada'
+  },
+  fim_caminhada: {
+    speaker: 'Narrador',
+    text: 'Sofia olha para você por um longo momento, como se quisesse dizer algo mais, mas apenas sorri. A chuva continua a cair, e vocês seguem caminhando juntos, sem pressa. O capítulo termina, mas a história de vocês está apenas começando.',
+    bg: IMAGES.bg_park,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim',
+    isEnd: true
+  },
+  
+  // ===== FINAL 2: ESTUDO =====
+  final_estudo: {
+    speaker: 'Você',
+    text: 'Sofia, que tal irmos para a biblioteca? Posso te ajudar com a pesquisa, se você quiser.',
+    bg: IMAGES.bg_library_night,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_estudo_2'
+  },
+  final_estudo_2: {
+    speaker: 'Sofia',
+    text: 'Seria ótimo! Eu poderia te mostrar o diário. Tenho certeza que você vai achar fascinante.',
+    bg: IMAGES.bg_library_night,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_estudo_3'
+  },
+  final_estudo_3: {
+    speaker: 'Narrador',
+    text: 'Vocês passam as horas seguintes na biblioteca, entre livros antigos e sussurros. Sofia se empolga ao explicar cada detalhe do diário, e você se pega admirando não só a história, mas a paixão dela por aquilo.',
+    bg: IMAGES.bg_library_night,
+    char: IMAGES.char_smile,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim_estudo'
+  },
+  fim_estudo: {
+    speaker: 'Narrador',
+    text: 'Quando a biblioteca fecha, vocês se despedem na porta. Sofia agradece pela companhia e diz que gostaria de repetir. Vocês combinaram de se encontrar novamente na próxima semana. Um novo capítulo se abre.',
+    bg: IMAGES.bg_library_night,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim',
+    isEnd: true
+  },
+  
+  // ===== FINAL 3: DESPEDIDA =====
+  final_despedida: {
+    speaker: 'Você',
+    text: 'Sofia, foi ótimo te ver, mas preciso ir. Tenho algumas coisas para resolver ainda hoje.',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_sad,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'final_despedida_2'
+  },
+  final_despedida_2: {
+    speaker: 'Sofia',
+    text: 'Ah... claro, eu entendo. Foi bom te ver também. A gente se fala, então?',
+    bg: IMAGES.bg_cafe_morning,
+    char: IMAGES.char_sad,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim_despedida'
+  },
+  fim_despedida: {
+    speaker: 'Narrador',
+    text: 'Vocês se despedem com um aceno. Sofia sai do café sozinha, sob a chuva, sem olhar para trás. Você fica com a sensação de que talvez tenha perdido algo importante. Mas a vida segue... e talvez outra oportunidade apareça.',
+    bg: IMAGES.bg_campus_rain,
+    char: null,
+    chapter: 'Capítulo 5 — Depois da Chuva',
+    next: 'fim',
+    isEnd: true
+  },
+  
+  // ===== FIM GERAL =====
+  fim: {
+    speaker: 'Narrador',
+    text: 'FIM DO CAPÍTULO 5. Obrigado por jogar! Clique para reiniciar.',
+    bg: IMAGES.bg_rooftop,
+    char: null,
+    chapter: 'Conclusão',
+    next: 'start',
+    isEnd: true
+  }
+};
+
+/* ============================================================
+   ELEMENTOS DO DOM
+   ============================================================ */
+const bgEl = document.getElementById('background');
+const charContainerEl = document.getElementById('character-container');
+const charImgEl = document.getElementById('character-img');
+const speakerEl = document.getElementById('speaker');
+const textEl = document.getElementById('text');
+const choicesEl = document.getElementById('choices');
+const affinityEl = document.getElementById('affinity');
+const chapterTagEl = document.getElementById('chapter-tag');
+const hintEl = document.getElementById('click-hint');
+const gameEl = document.getElementById('game');
+const backBtn = document.getElementById('back-btn');
+const flashEl = document.getElementById('flash');
+const chapterTitleEl = document.getElementById('chapter-title');
+
+/* ============================================================
+   SISTEMA DE DIGITAÇÃO
+   ============================================================ */
+let typing = false;
+let typeInterval = null;
+let currentText = '';
+let currentNext = null;
+
+function typeWriter(text, callback) {
+  typing = true;
+  currentText = text;
+  textEl.innerHTML = '';
+  
+  let i = 0;
+  clearInterval(typeInterval);
+
+  typeInterval = setInterval(() => {
+    if (i < text.length) {
+      textEl.textContent = text.substring(0, i + 1);
+      textEl.appendChild(createCursor());
+      i++;
+    } else {
+      completeTyping(callback);
+    }
+  }, 20);
+}
+
+function createCursor() {
+  const cursor = document.createElement('span');
+  cursor.id = 'cursor';
+  return cursor;
+}
+
+function completeTyping(callback) {
+  clearInterval(typeInterval);
+  textEl.textContent = currentText;
+  textEl.appendChild(createCursor());
+  typing = false;
+  if (callback) callback();
+}
+
+function skipTyping() {
+  const node = story[state.currentNode];
+  completeTyping(() => {
+    if (node.choices) showChoices(node.choices);
+  });
+}
+
+/* ============================================================
+   EFEITOS VISUAIS
+   ============================================================ */
+function flash() {
+  flashEl.classList.add('active');
+  setTimeout(() => flashEl.classList.remove('active'), 300);
+}
+
+function spawnHeart() {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = '💜';
+  heart.style.left = (30 + Math.random() * 40) + '%';
+  heart.style.bottom = '200px';
+  gameEl.appendChild(heart);
+  setTimeout(() => heart.remove(), 3000);
+}
+
+function showChapterTitle() {
+  chapterTitleEl.classList.add('active');
+  setTimeout(() => {
+    chapterTitleEl.classList.remove('active');
+  }, 1800);
+}
+
+/* ============================================================
+   GERENCIAMENTO DE CENA
+   ============================================================ */
+function goToNode(nodeId) {
+  const node = story[nodeId];
+  if (!node) return;
+
+  state.currentNode = nodeId;
+
+  if (node.bg) {
+    bgEl.style.backgroundImage = `url('${node.bg}')`;
+  }
+
+  if (node.char) {
+    charImgEl.src = node.char;
+    charContainerEl.classList.add('show');
+  } else {
+    charContainerEl.classList.remove('show');
+  }
+
+  chapterTagEl.textContent = node.chapter || 'Visual Novel';
+  speakerEl.textContent = node.speaker || '';
+  choicesEl.classList.remove('active');
+  
+  if (node.isEnd) {
+    backBtn.classList.add('visible');
+  } else {
+    backBtn.classList.remove('visible');
+  }
+  
+  typeWriter(node.text, () => {
+    if (node.choices) showChoices(node.choices);
+  });
+
+  currentNext = node.next || null;
+  hintEl.style.display = node.choices ? 'none' : 'block';
+}
+
+/* ============================================================
+   SISTEMA DE ESCOLHAS
+   ============================================================ */
+function showChoices(choices) {
+  choicesEl.innerHTML = '';
+  choicesEl.classList.add('active');
+
+  choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.style.animation = `fadeIn 0.4s ease ${index * 0.1}s both`;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      choicesEl.classList.remove('active');
+      
+      // Aumenta afinidade
+      const oldAffinity = state.affinity;
+      state.affinity += choice.affinity || 0;
+      affinityEl.textContent = state.affinity;
+      
+      // Corações se ganhar afinidade
+      if (choice.affinity > 0 && oldAffinity !== state.affinity) {
+        for (let i = 0; i < choice.affinity; i++) {
+          setTimeout(() => spawnHeart(), i * 200);
+        }
+      }
+      
+      flash();
+      setTimeout(() => goToNode(choice.next), 200);
+    };
+    choicesEl.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   CONTROLES DE NAVEGAÇÃO
+   ============================================================ */
+function advanceStory() {
+  if (choicesEl.classList.contains('active')) return;
+
+  if (typing) {
+    skipTyping();
+    return;
+  }
+
+  if (currentNext) {
+    if (story[state.currentNode].isEnd) {
+      state.affinity = 0;
+      affinityEl.textContent = 0;
+      backBtn.classList.remove('visible');
+    }
+    flash();
+    setTimeout(() => goToNode(currentNext), 150);
+  }
+}
+
+gameEl.addEventListener('click', (e) => {
+  if (e.target.classList.contains('choice-btn')) return;
+  if (e.target === backBtn) return;
+  advanceStory();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (['Space', 'Enter', 'ArrowRight'].includes(e.code)) {
+    e.preventDefault();
+    advanceStory();
+  }
+});
+
+// Animação de fadeIn
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+document.head.appendChild(style);
+
+// Inicialização — mostra o título do capítulo antes de começar
+showChapterTitle();
+setTimeout(() => goToNode('start'), 1900);
+</script>
+
+</body>
+</html>

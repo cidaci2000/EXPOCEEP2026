@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Novel - Selecione uma História</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #2d0a4e 50%, #0d001a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efeito de estrelas/brilho no fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(192, 192, 192, 0.6), transparent),
+                radial-gradient(2px 2px at 60% 70%, rgba(192, 192, 192, 0.4), transparent),
+                radial-gradient(1px 1px at 50% 50%, rgba(192, 192, 192, 0.5), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(192, 192, 192, 0.5), transparent),
+                radial-gradient(2px 2px at 90% 80%, rgba(192, 192, 192, 0.3), transparent),
+                radial-gradient(1px 1px at 10% 90%, rgba(192, 192, 192, 0.4), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            z-index: 1;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #e8e8e8 0%, #c0c0c0 50%, #8a8a8a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #b8b8b8;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(192, 192, 192, 0.3);
+            display: inline-block;
+            padding-bottom: 8px;
+        }
+
+        .subtitle::before,
+        .subtitle::after {
+            content: '✦';
+            color: #a855f7;
+            margin: 0 12px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+            z-index: 1;
+            padding: 0 10px;
+        }
+
+        .novel-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(45, 10, 78, 0.9), rgba(26, 0, 51, 0.95));
+            border: 2px solid rgba(192, 192, 192, 0.4);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .novel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .novel-card:hover::before {
+            left: 100%;
+        }
+
+        .novel-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            border-color: #a855f7;
+            box-shadow: 
+                0 10px 40px rgba(168, 85, 247, 0.4),
+                0 0 20px rgba(192, 192, 192, 0.3),
+                inset 0 0 20px rgba(168, 85, 247, 0.1);
+        }
+
+        .novel-card:active {
+            transform: translateY(-3px) scale(1.01);
+        }
+
+        .card-number {
+            font-size: 0.85rem;
+            color: #a855f7;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.6));
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            background: linear-gradient(180deg, #ffffff 0%, #c0c0c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #999;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .card-button {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(192, 192, 192, 0.5);
+        }
+
+        .novel-card:hover .card-button {
+            background: linear-gradient(135deg, #a855f7, #c084fc);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            z-index: 1;
+        }
+
+        footer span {
+            color: #a855f7;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+                letter-spacing: 2px;
+            }
+            .subtitle {
+                font-size: 0.9rem;
+                letter-spacing: 3px;
+            }
+            .grid-container {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 18px;
+            }
+            .novel-card {
+                padding: 22px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .subtitle {
+                font-size: 0.75rem;
+                letter-spacing: 2px;
+            }
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .novel-card {
+                padding: 18px 10px;
+            }
+            .card-icon {
+                font-size: 1.8rem;
+            }
+            .card-title {
+                font-size: 1rem;
+            }
+            .card-desc {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>VISUAL NOVEL</h1>
+        <div class="subtitle">Escolha sua História</div>
+    </header>
+
+    <main class="grid-container">
+        <!-- Capítulo Principal -->
+        <a href="visualnovel.html" class="novel-card">
+            <div class="card-number">✦ Início ✦</div>
+            <div class="card-icon">🌸</div>
+            <div class="card-title">Prólogo</div>
+            <div class="card-desc">O começo de tudo. Onde sua jornada se inicia.</div>
+            <span class="card-button">Começar</span>
+        </a>
+
+        <!-- Capítulo 1 -->
+        <a href="visualnovel1.html" class="novel-card">
+            <div class="card-number">Capítulo 01</div>
+            <div class="card-icon">🌙</div>
+            <div class="card-title">O Encontro</div>
+            <div class="card-desc">Um destino inesperado cruza seu caminho.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 2 -->
+        <a href="visualnovel2.html" class="novel-card">
+            <div class="card-number">Capítulo 02</div>
+            <div class="card-icon">⚔️</div>
+            <div class="card-title">A Batalha</div>
+            <div class="card-desc">Desafios surgem e provações testam sua força.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 3 -->
+        <a href="visualnovel3.html" class="novel-card">
+            <div class="card-number">Capítulo 03</div>
+            <div class="card-icon">💜</div>
+            <div class="card-title">Sentimentos</div>
+            <div class="card-desc">Emoções profundas começam a florescer.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 4 -->
+        <a href="visualnovel4.html" class="novel-card">
+            <div class="card-number">Capítulo 04</div>
+            <div class="card-icon">🔮</div>
+            <div class="card-title">Segredos</div>
+            <div class="card-desc">Verdades ocultas vêm à tona.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 5 -->
+        <a href="visualnovel5.html" class="novel-card">
+            <div class="card-number">Capítulo 05</div>
+            <div class="card-icon">🌟</div>
+            <div class="card-title">A Escolha</div>
+            <div class="card-desc">Decisões cruciais moldam o futuro.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 6 -->
+        <a href="visualnovel6.html" class="novel-card">
+            <div class="card-number">Capítulo 06</div>
+            <div class="card-icon">❄️</div>
+            <div class="card-title">Inverno</div>
+            <div class="card-desc">Tempos sombrios e frios se aproximam.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 7 -->
+        <a href="visualnovel7.html" class="novel-card">
+            <div class="card-number">Capítulo 07</div>
+            <div class="card-icon">🌹</div>
+            <div class="card-title">Redenção</div>
+            <div class="card-desc">Uma chance de mudar o destino.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+
+        <!-- Capítulo 8 -->
+        <a href="visualnovel8.html" class="novel-card">
+            <div class="card-number">Capítulo 08</div>
+            <div class="card-icon">👑</div>
+            <div class="card-title">Final</div>
+            <div class="card-desc">O desfecho de toda a jornada.</div>
+            <span class="card-button">Jogar</span>
+        </a>
+    </main>
+
+    <footer>
+        Feito com <span>♥</span> para os fãs de Visual Novel
+    </footer>
+</body>
+</html>
