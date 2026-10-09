@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExpoCEep — Arcade Verde Prata</title>
+<style>
+    :root{
+        --bg:#0a0f0a;
+        --verde:#00e676;
+        --verde-esc:#00b34a;
+        --prata:#c0c0c0;
+        --prata-esc:#8a8a8a;
+        --glass:rgba(192,192,192,0.08);
+        --glass-verde:rgba(0,230,118,0.10);
+        --linha-verde:rgba(0,230,118,0.72);
+        --linha-prata:rgba(192,192,192,0.55);
+        --sombra-verde:rgba(0,230,118,0.35);
+        --sombra-prata:rgba(192,192,192,0.25);
+        --texto:#e8f5e9;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+
+    html,body{
+        width:100%;
+        min-height:100%;
+        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+        background:
+            radial-gradient(circle at top left, rgba(0,230,118,0.06), transparent 40%),
+            radial-gradient(circle at bottom right, rgba(192,192,192,0.05), transparent 45%),
+            var(--bg);
+        color:var(--texto);
+        overflow-x:hidden;
+    }
+
+    /* ---------- ESTRELAS / FUNDO ---------- */
+    .stars{
+        position:fixed; inset:0; pointer-events:none; z-index:0;
+        background:
+            radial-gradient(2px 2px at 15% 25%, rgba(0,230,118,0.8), transparent),
+            radial-gradient(1px 1px at 70% 15%, rgba(192,192,192,0.9), transparent),
+            radial-gradient(2px 2px at 40% 75%, rgba(0,230,118,0.5), transparent),
+            radial-gradient(1px 1px at 85% 60%, rgba(192,192,192,0.7), transparent),
+            radial-gradient(1px 1px at 10% 85%, rgba(0,230,118,0.6), transparent),
+            radial-gradient(1px 1px at 55% 45%, rgba(192,192,192,0.5), transparent);
+    }
+
+    /* ---------- LOGIN ---------- */
+    #tela-login{
+        position:fixed; inset:0; z-index:100;
+        display:flex; align-items:center; justify-content:center;
+        background:
+            radial-gradient(circle at top, rgba(0,230,118,0.10), transparent 40%),
+            radial-gradient(circle at bottom, rgba(192,192,192,0.07), transparent 45%),
+            #070b07;
+        transition:0.5s ease;
+    }
+
+    .login-box{
+        width:min(420px, 92vw);
+        padding:38px 30px;
+        border-radius:26px;
+        background:rgba(15,20,15,0.85);
+        backdrop-filter: blur(10px);
+        border:2px solid var(--linha-verde);
+        box-shadow:
+            0 0 18px var(--sombra-verde),
+            0 0 40px rgba(0,230,118,0.12),
+            inset 0 0 22px rgba(192,192,192,0.04);
+        text-align:center;
+    }
+
+    .login-box h1{
+        font-size:2rem;
+        letter-spacing:2px;
+        margin-bottom:6px;
+        color:var(--verde);
+        text-shadow:0 0 14px rgba(0,230,118,0.55);
+    }
+
+    .login-box p{
+        font-size:0.9rem;
+        color:var(--prata-esc);
+        margin-bottom:26px;
+    }
+
+    .login-box input{
+        width:100%;
+        padding:14px 16px;
+        margin-bottom:14px;
+        border-radius:14px;
+        border:2px solid rgba(192,192,192,0.25);
+        background:rgba(192,192,192,0.06);
+        color:var(--texto);
+        font-size:1rem;
+        outline:none;
+        transition:0.25s;
+    }
+
+    .login-box input:focus{
+        border-color:var(--verde);
+        box-shadow:0 0 12px rgba(0,230,118,0.35);
+    }
+
+    .login-box button{
+        width:100%;
+        padding:15px;
+        border:none;
+        border-radius:14px;
+        background:linear-gradient(135deg, var(--verde-esc), var(--verde));
+        color:#062b12;
+        font-size:1.1rem;
+        font-weight:800;
+        letter-spacing:1px;
+        cursor:pointer;
+        transition:0.25s;
+        box-shadow:0 0 16px rgba(0,230,118,0.45);
+    }
+
+    .login-box button:hover{
+        transform:scale(1.03);
+        box-shadow:0 0 26px rgba(0,230,118,0.7);
+    }
+
+    .login-erro{
+        color:#ff5252;
+        font-size:0.85rem;
+        min-height:20px;
+        margin-bottom:8px;
+    }
+
+    /* ---------- APP PRINCIPAL ---------- */
+    #app{
+        display:none;
+        position:relative;
+        z-index:1;
+        max-width:1100px;
+        margin:auto;
+        padding:24px 20px 60px;
+    }
+
+    .topo{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:12px;
+        margin-bottom:26px;
+    }
+
+    .topo h1{
+        font-size:1.8rem;
+        color:var(--verde);
+        text-shadow:0 0 12px rgba(0,230,118,0.45);
+    }
+
+    .topo .usuario{
+        font-size:0.9rem;
+        color:var(--prata);
+        background:rgba(192,192,192,0.08);
+        padding:8px 16px;
+        border-radius:999px;
+        border:1px solid rgba(192,192,192,0.2);
+    }
+
+    .topo .usuario button{
+        margin-left:10px;
+        background:transparent;
+        border:1px solid var(--prata-esc);
+        color:var(--prata);
+        padding:4px 10px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:0.8rem;
+        transition:0.2s;
+    }
+
+    .topo .usuario button:hover{
+        background:rgba(192,192,192,0.15);
+    }
+
+    /* ---------- MENU PRINCIPAL ---------- */
+    .menu-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+        gap:20px;
+    }
+
+    .card-jogo{
+        background:var(--glass);
+        backdrop-filter: blur(8px);
+        border:2px solid var(--linha-prata);
+        border-radius:22px;
+        padding:28px 18px;
+        text-align:center;
+        cursor:pointer;
+        transition:0.3s;
+        box-shadow:0 0 12px rgba(192,192,192,0.12), inset 0 0 18px rgba(255,255,255,0.03);
+    }
+
+    .card-jogo:hover{
+        transform:translateY(-8px) scale(1.02);
+        border-color:var(--verde);
+        box-shadow:0 0 22px var(--sombra-verde), 0 0 40px rgba(0,230,118,0.12);
+    }
+
+    .card-jogo .icone{
+        font-size:2.6rem;
+        display:block;
+        margin-bottom:10px;
+    }
+
+    .card-jogo h3{
+        font-size:1.15rem;
+        color:var(--prata);
+        letter-spacing:0.5px;
+    }
+
+    .card-jogo.destaque{
+        border-color:var(--verde);
+        box-shadow:0 0 18px var(--sombra-verde);
+    }
+
+    .card-jogo.destaque h3{ color:var(--verde); }
+
+    /* ---------- SEÇÕES DE JOGO ---------- */
+    .secao{
+        display:none;
+        animation:fadeIn 0.35s ease;
+    }
+
+    .secao.ativa{ display:block; }
+
+    @keyframes fadeIn{
+        from{ opacity:0; transform:translateY(12px); }
+        to{ opacity:1; transform:translateY(0); }
+    }
+
+    .secao h2{
+        text-align:center;
+        font-size:1.7rem;
+        margin-bottom:6px;
+        color:var(--verde);
+        text-shadow:0 0 10px rgba(0,230,118,0.4);
+    }
+
+    .secao .desc{
+        text-align:center;
+        color:var(--prata-esc);
+        font-size:0.9rem;
+        margin-bottom:22px;
+    }
+
+    .btn-voltar{
+        display:inline-block;
+        margin-bottom:18px;
+        padding:10px 18px;
+        border-radius:12px;
+        border:2px solid var(--linha-prata);
+        background:rgba(192,192,192,0.08);
+        color:var(--prata);
+        font-weight:700;
+        cursor:pointer;
+        transition:0.25s;
+    }
+
+    .btn-voltar:hover{
+        border-color:var(--verde);
+        color:var(--verde);
+        box-shadow:0 0 14px rgba(0,230,118,0.3);
+    }
+
+    .centro{ text-align:center; }
+
+    /* ---------- BOTÕES GENÉRICOS ---------- */
+    .btn{
+        padding:12px 22px;
+        border:none;
+        border-radius:14px;
+        font-weight:800;
+        font-size:1rem;
+        cursor:pointer;
+        transition:0.25s;
+        margin:6px;
+    }
+
+    .btn-verde{
+        background:linear-gradient(135deg, var(--verde-esc), var(--verde));
+        color:#062b12;
+        box-shadow:0 0 14px rgba(0,230,118,0.4);
+    }
+
+    .btn-verde:hover{ transform:scale(1.05); box-shadow:0 0 24px rgba(0,230,118,0.7); }
+
+    .btn-prata{
+        background:rgba(192,192,192,0.12);
+        color:var(--prata);
+        border:2px solid var(--linha-prata);
+    }
+
+    .btn-prata:hover{
+        transform:scale(1.05);
+        border-color:var(--verde);
+        color:var(--verde);
+        box-shadow:0 0 16px rgba(0,230,118,0.3);
+    }
+
+    /* ---------- JOGO DA VELHA ---------- */
+    .tabuleiro{
+        display:grid;
+        grid-template-columns:repeat(3, 120px);
+        gap:12px;
+        justify-content:center;
+        margin:18px auto;
+    }
+
+    .casa{
+        width:120px; height:120px;
+        border-radius:18px;
+        border:2px solid rgba(192,192,192,0.18);
+        background:rgba(192,192,192,0.05);
+        color:var(--texto);
+        font-size:58px;
+        font-weight:bold;
+        cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        transition:0.2s;
+    }
+
+    .casa:hover{ border-color:var(--verde); box-shadow:0 0 12px rgba(0,230,118,0.3); }
+
+    .x{ color:var(--verde); text-shadow:0 0 12px var(--verde); }
+    .o{ color:var(--prata); text-shadow:0 0 12px var(--prata); }
+
+    .status{
+        font-size:1.4rem;
+        font-weight:800;
+        text-align:center;
+        margin:10px 0;
+        color:var(--prata);
+    }
+
+    /* ---------- MEMÓRIA ---------- */
+    .memoria-grid{
+        display:grid;
+        grid-template-columns:repeat(4, 90px);
+        gap:12px;
+        justify-content:center;
+        margin:20px auto;
+    }
+
+    .card-mem{
+        width:90px; height:90px;
+        border-radius:16px;
+        border:2px solid rgba(192,192,192,0.18);
+        background:rgba(192,192,192,0.06);
+        color:var(--texto);
+        font-size:2rem;
+        cursor:pointer;
+        display:flex; align-items:center; justify-content:center;
+        transition:0.2s;
+        user-select:none;
+    }
+
+    .card-mem.virada{
+        background:rgba(0,230,118,0.14);
+        border-color:var(--linha-verde);
+        box-shadow:0 0 14px rgba(0,230,118,0.3);
+    }
+
+    .card-mem.certa{
+        background:rgba(192,192,192,0.14);
+        border-color:var(--linha-prata);
+        cursor:default;
+    }
+
+    /* ---------- SNAKE ---------- */
+    .snake-board{
+        width:min(420px, 90vw);
+        aspect-ratio:1;
+        display:grid;
+        grid-template-columns:repeat(20, 1fr);
+        gap:2px;
+        padding:10px;
+        border-radius:20px;
+        background:rgba(192,192,192,0.04);
+        border:1px solid rgba(192,192,192,0.12);
+        margin:16px auto;
+    }
+
+    .cell{ border-radius:4px; background:rgba(192,192,192,0.03); }
+    .snake{ background:var(--verde); box-shadow:0 0 8px rgba(0,230,118,0.75); }
+    .snake2{ background:var(--prata); box-shadow:0 0 8px rgba(192,192,192,0.75); }
+    .food{ background:#ffffff; box-shadow:0 0 10px rgba(255,255,255,0.85); }
+
+    /* ---------- DODGE ---------- */
+    .dodge-area{
+        position:relative;
+        width:min(480px, 90vw);
+        height:340px;
+        border-radius:20px;
+        background:rgba(192,192,192,0.04);
+        border:1px solid rgba(192,192,192,0.12);
+        overflow:hidden;
+        margin:16px auto;
+    }
+
+    .player, .block{ position:absolute; border-radius:12px; }
+
+    .player{
+        width:54px; height:18px;
+        bottom:18px; left:50%;
+        transform:translateX(-50%);
+        background:var(--verde);
+        box-shadow:0 0 14px rgba(0,230,118,0.85);
+    }
+
+    .block{
+        width:42px; height:42px;
+        top:-50px;
+        background:var(--prata);
+        box-shadow:0 0 12px rgba(192,192,192,0.75);
+    }
+
+    /* ---------- ALVO ---------- */
+    .target-area{
+        position:relative;
+        width:min(600px, 92vw);
+        height:340px;
+        border-radius:20px;
+        background:rgba(192,192,192,0.04);
+        border:1px solid rgba(192,192,192,0.12);
+        overflow:hidden;
+        margin:16px auto;
+    }
+
+    .target{
+        position:absolute;
+        width:56px; height:56px;
+        border-radius:50%;
+        border:2px solid rgba(255,255,255,0.7);
+        background:radial-gradient(circle, #fff 0 16%, var(--verde) 17% 40%, var(--prata) 41% 62%, #fff 63% 100%);
+        box-shadow:0 0 14px rgba(255,255,255,0.6), 0 0 20px rgba(0,230,118,0.4);
+        cursor:pointer;
+    }
+
+    /* ---------- BADGES ---------- */
+    .badges{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        justify-content:center;
+        margin-bottom:8px;
+    }
+
+    .badge{
+        padding:8px 16px;
+        border-radius:999px;
+        border:1px solid rgba(192,192,192,0.2);
+        background:rgba(192,192,192,0.06);
+        font-size:0.85rem;
+        color:var(--prata);
+    }
+
+    .badge span{ color:var(--verde); font-weight:800; }
+
+    /* ---------- EXPO CEEP ---------- */
+    .expo-header{
+        text-align:center;
+        margin-bottom:30px;
+    }
+
+    .expo-header h2{
+        font-size:2rem;
+        color:var(--verde);
+        text-shadow:0 0 16px rgba(0,230,118,0.5);
+        letter-spacing:2px;
+    }
+
+    .expo-header p{
+        color:var(--prata-esc);
+        font-size:0.95rem;
+        margin-top:6px;
+    }
+
+    .expo-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+        gap:22px;
+    }
+
+    .expo-card{
+        background:linear-gradient(160deg, rgba(0,230,118,0.06), rgba(192,192,192,0.05));
+        border:2px solid var(--linha-prata);
+        border-radius:22px;
+        padding:26px 20px;
+        transition:0.3s;
+        box-shadow:0 0 14px rgba(192,192,192,0.1);
+    }
+
+    .expo-card:hover{
+        border-color:var(--verde);
+        box-shadow:0 0 24px rgba(0,230,118,0.25);
+        transform:translateY(-6px);
+    }
+
+    .expo-card h3{
+        color:var(--verde);
+        font-size:1.2rem;
+        margin-bottom:8px;
+    }
+
+    .expo-card p{
+        color:var(--prata-esc);
+        font-size:0.85rem;
+        line-height:1.5;
+    }
+
+    /* ---------- PEDRA PAPEL TESOURA ---------- */
+    .ppt-resultado{
+        font-size:1.3rem;
+        font-weight:700;
+        color:var(--prata);
+        text-align:center;
+        margin:16px 0;
+    }
+
+    /* ---------- RESPONSIVO ---------- */
+    @media (max-width:820px){
+        .topo h1{ font-size:1.4rem; }
+        .tabuleiro{ grid-template-columns:repeat(3, 90px); }
+        .casa{ width:90px; height:90px; font-size:44px; border-radius:14px; }
+        .memoria-grid{ grid-template-columns:repeat(4, 70px); }
+        .card-mem{ width:70px; height:70px; font-size:1.6rem; }
+        .snake-board{ width:min(340px, 92vw); }
+        .dodge-area, .target-area{ height:280px; }
+        .login-box h1{ font-size:1.6rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<!-- ================= LOGIN ================= -->
+<div id="tela-login">
+    <div class="login-box">
+        <h1>EXPO CEEP</h1>
+        <p>Arcade Verde Prata — faça login para jogar</p>
+        <input type="text" id="login-usuario" placeholder="Usuário" autocomplete="off">
+        <input type="password" id="login-senha" placeholder="Senha">
+        <div class="login-erro" id="login-erro"></div>
+        <button onclick="fazerLogin()">ENTRAR</button>
+    </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+
+    <!-- TOPO -->
+    <div class="topo">
+        <h1>🌿 Expo CEEP Arcade</h1>
+        <div class="usuario">
+            <span id="nome-usuario">visitante</span>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <!-- ================= MENU PRINCIPAL ================= -->
+    <div id="secao-menu" class="secao ativa">
+        <div class="menu-grid">
+            <div class="card-jogo" onclick="abrirJogo('expoceep')">
+                <span class="icone">🏫</span>
+                <h3>Expo CEEP</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('ttt')">
+                <span class="icone">🩶</span>
+                <h3>Jogo da Velha</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('memoria')">
+                <span class="icone">🧠</span>
+                <h3>Memória Neon</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('snake')">
+                <span class="icone">🐍</span>
+                <h3>Snake Verde</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('dodge')">
+                <span class="icone">🌙</span>
+                <h3>Dodge Prata</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('alvo')">
+                <span class="icone">🎯</span>
+                <h3>Alvo Verde</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('ppt')">
+                <span class="icone">✂️</span>
+                <h3>Pedra Papel Tesoura</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('numero')">
+                <span class="icone">🎲</span>
+                <h3>Adivinhe o Número</h3>
+            </div>
+            <div class="card-jogo" onclick="abrirJogo('reflexo')">
+                <span class="icone">⚡</span>
+                <h3>Teste de Reflexo</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= EXPO CEEP ================= -->
+    <div id="secao-expoceep" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <div class="expo-header">
+            <h2>EXPO CEEP</h2>
+            <p>Projetos e jogos desenvolvidos para a mostra técnica</p>
+        </div>
+        <div class="expo-grid">
+            <div class="expo-card">
+                <h3>🌿 Sustentabilidade Digital</h3>
+                <p>Jogos educativos que unem tecnologia e consciência ambiental, usando paleta verde para reforçar a temática ecológica.</p>
+            </div>
+            <div class="expo-card">
+                <h3>💻 Programação Criativa</h3>
+                <p>Desenvolvimento de mini-games em HTML, CSS e JavaScript puro, sem frameworks, mostrando o domínio da base web.</p>
+            </div>
+            <div class="expo-card">
+                <h3>🎮 Arcade Educativo</h3>
+                <p>Coletânea de 9 jogos clássicos reinterpretados com identidade visual verde e prata, acessíveis e responsivos.</p>
+            </div>
+            <div class="expo-card">
+                <h3>🤝 Trabalho em Equipe</h3>
+                <p>Integração de dois projetos distintos em uma única plataforma unificada, com login e menu centralizado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JOGO DA VELHA ================= -->
+    <div id="secao-ttt" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>JOGO DA VELHA</h2>
+        <p class="desc">Verde é X, Prata é O</p>
+        <div class="status" id="ttt-status">VEZ DO X</div>
+        <div class="tabuleiro" id="ttt-board">
+            <div class="casa" onclick="jogarTTT(this,0)"></div>
+            <div class="casa" onclick="jogarTTT(this,1)"></div>
+            <div class="casa" onclick="jogarTTT(this,2)"></div>
+            <div class="casa" onclick="jogarTTT(this,3)"></div>
+            <div class="casa" onclick="jogarTTT(this,4)"></div>
+            <div class="casa" onclick="jogarTTT(this,5)"></div>
+            <div class="casa" onclick="jogarTTT(this,6)"></div>
+            <div class="casa" onclick="jogarTTT(this,7)"></div>
+            <div class="casa" onclick="jogarTTT(this,8)"></div>
+        </div>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="reiniciarTTT()">REINICIAR</button>
+        </div>
+    </div>
+
+    <!-- ================= MEMÓRIA ================= -->
+    <div id="secao-memoria" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>MEMÓRIA NEON</h2>
+        <p class="desc">Ache os pares antes de acabar as tentativas</p>
+        <div class="badges">
+            <div class="badge">Pares: <span id="mem-pares">0</span>/6</div>
+            <div class="badge">Tentativas: <span id="mem-tentativas">0</span></div>
+        </div>
+        <div class="memoria-grid" id="mem-grid"></div>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="reiniciarMemoria()">REINICIAR</button>
+        </div>
+    </div>
+
+    <!-- ================= SNAKE ================= -->
+    <div id="secao-snake" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>SNAKE VERDE</h2>
+        <p class="desc">Use as setas do teclado</p>
+        <div class="badges">
+            <div class="badge">Score: <span id="snake-score">0</span></div>
+            <div class="badge">Maior: <span id="snake-best">0</span></div>
+        </div>
+        <div class="snake-board" id="snake-board"></div>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="reiniciarSnake()">REINICIAR</button>
+        </div>
+    </div>
+
+    <!-- ================= DODGE ================= -->
+    <div id="secao-dodge" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>DODGE PRATA</h2>
+        <p class="desc">Desvie dos blocos pratas que caem</p>
+        <div class="badges">
+            <div class="badge">Tempo: <span id="dodge-time">0</span>s</div>
+            <div class="badge">Recorde: <span id="dodge-best">0</span>s</div>
+        </div>
+        <div class="dodge-area" id="dodge-area">
+            <div class="player" id="player"></div>
+        </div>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="reiniciarDodge()">REINICIAR</button>
+        </div>
+    </div>
+
+    <!-- ================= ALVO ================= -->
+    <div id="secao-alvo" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>ALVO VERDE</h2>
+        <p class="desc">Clique no alvo para somar pontos</p>
+        <div class="badges">
+            <div class="badge">Pontos: <span id="target-score">0</span></div>
+            <div class="badge">Tempo: <span id="target-time">30</span>s</div>
+        </div>
+        <div class="target-area" id="target-area">
+            <div class="target" id="target" onclick="clicarAlvo()"></div>
+        </div>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="reiniciarAlvo()">REINICIAR</button>
+        </div>
+    </div>
+
+    <!-- ================= PEDRA PAPEL TESOURA ================= -->
+    <div id="secao-ppt" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>✂️ PEDRA PAPEL TESOURA</h2>
+        <p class="desc">Escolha sua jogada</p>
+        <div class="centro">
+            <button class="btn btn-verde" onclick="jogarPPT('Pedra')">Pedra</button>
+            <button class="btn btn-prata" onclick="jogarPPT('Papel')">Papel</button>
+            <button class="btn btn-verde" onclick="jogarPPT('Tesoura')">Tesoura</button>
+        </div>
+        <div class="ppt-resultado" id="ppt-resultado"></div>
+    </div>
+
+    <!-- ================= ADIVINHE O NÚMERO ================= -->
+    <div id="secao-numero" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>🎲 ADIVINHE O NÚMERO</h2>
+        <p class="desc">Digite um número entre 1 e 100</p>
+        <div class="centro">
+            <input id="palpite" type="number" placeholder="Seu palpite"
+                style="padding:12px;border-radius:12px;border:2px solid var(--linha-prata);
+                       background:rgba(192,192,192,0.06);color:var(--texto);font-size:1rem;width:min(220px,80vw);">
+            <br>
+            <button class="btn btn-verde" onclick="verificarNumero()">TENTAR</button>
+        </div>
+        <div class="ppt-resultado" id="numero-msg"></div>
+    </div>
+
+    <!-- ================= TESTE DE REFLEXO ================= -->
+    <div id="secao-reflexo" class="secao">
+        <button class="btn-voltar" onclick="voltarMenu()">← Voltar</button>
+        <h2>⚡ TESTE DE REFLEXO</h2>
+        <p class="desc">Espere o botão mudar e clique o mais rápido possível</p>
+        <div class="centro">
+            <button id="reflex-btn" class="btn btn-prata"
+                style="font-size:1.3rem;padding:20px 40px;"
+                onclick="clicouReflexo()">Aguarde...</button>
+        </div>
+        <div class="ppt-resultado" id="reflex-tempo"></div>
+    </div>
+
+</div>
+
+<script>
+/* ============================================================
+   LOGIN (sem banco de dados)
+   ============================================================ */
+const USUARIO_VALIDO = "admin";
+const SENHA_VALIDA = "1234";
+
+function fazerLogin(){
+    const usuario = document.getElementById('login-usuario').value.trim();
+    const senha = document.getElementById('login-senha').value.trim();
+    const erro = document.getElementById('login-erro');
+
+    if(!usuario || !senha){
+        erro.textContent = "Preencha usuário e senha.";
+        return;
+    }
+
+    if(usuario === USUARIO_VALIDO && senha === SENHA_VALIDA){
+        erro.textContent = "";
+        document.getElementById('tela-login').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('nome-usuario').textContent = usuario;
+        // Inicializa jogos após login
+        reiniciarTTT();
+        reiniciarMemoria();
+        buildSnakeBoard();
+        resetSnakeState();
+    } else {
+        erro.textContent = "Usuário ou senha incorretos. (admin / 1234)";
+    }
+}
+
+function logout(){
+    // Para todos os timers
+    pararSnake();
+    pararDodge();
+    pararAlvo();
+    pararReflexo();
+
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'flex';
+    document.getElementById('login-usuario').value = '';
+    document.getElementById('login-senha').value = '';
+    document.getElementById('login-erro').textContent = '';
+    voltarMenu();
+}
+
+// Enter no login
+document.getElementById('login-senha').addEventListener('keydown', e => {
+    if(e.key === 'Enter') fazerLogin();
+});
+document.getElementById('login-usuario').addEventListener('keydown', e => {
+    if(e.key === 'Enter') fazerLogin();
+});
+
+/* ============================================================
+   NAVEGAÇÃO ENTRE SEÇÕES
+   ============================================================ */
+const secoes = {
+    menu: document.getElementById('secao-menu'),
+    expoceep: document.getElementById('secao-expoceep'),
+    ttt: document.getElementById('secao-ttt'),
+    memoria: document.getElementById('secao-memoria'),
+    snake: document.getElementById('secao-snake'),
+    dodge: document.getElementById('secao-dodge'),
+    alvo: document.getElementById('secao-alvo'),
+    ppt: document.getElementById('secao-ppt'),
+    numero: document.getElementById('secao-numero'),
+    reflexo: document.getElementById('secao-reflexo')
+};
+
+function mostrarSecao(nome){
+    Object.values(secoes).forEach(s => s.classList.remove('ativa'));
+    secoes[nome].classList.add('ativa');
+}
+
+function abrirJogo(nome){
+    mostrarSecao(nome);
+    if(nome === 'snake') iniciarSnake();
+    if(nome === 'dodge') iniciarDodge();
+    if(nome === 'alvo') iniciarAlvo();
+    if(nome === 'memoria') reiniciarMemoria();
+    if(nome === 'numero') reiniciarNumero();
+    if(nome === 'reflexo') prepararReflexo();
+    if(nome === 'expoceep') { /* nada extra */ }
+}
+
+function voltarMenu(){
+    mostrarSecao('menu');
+    pararSnake();
+    pararDodge();
+    pararAlvo();
+    pararReflexo();
+}
+
+/* ============================================================
+   JOGO DA VELHA
+   ============================================================ */
+let jogadorTTT = 'X';
+let tabuleiroTTT = ['', '', '', '', '', '', '', '', ''];
+let jogoAcabouTTT = false;
+const tttStatus = document.getElementById('ttt-status');
+const vitoriasTTT = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function reiniciarTTT(){
+    jogadorTTT = 'X';
+    tabuleiroTTT = ['', '', '', '', '', '', '', '', ''];
+    jogoAcabouTTT = false;
+    tttStatus.textContent = 'VEZ DO X';
+    document.querySelectorAll('#ttt-board .casa').forEach(c => {
+        c.textContent = '';
+        c.classList.remove('x', 'o');
+    });
+}
+
+function jogarTTT(casa, index){
+    if(tabuleiroTTT[index] !== '' || jogoAcabouTTT) return;
+    tabuleiroTTT[index] = jogadorTTT;
+    casa.textContent = jogadorTTT;
+    casa.classList.add(jogadorTTT === 'X' ? 'x' : 'o');
+
+    for(const trio of vitoriasTTT){
+        const [a,b,c] = trio;
+        if(tabuleiroTTT[a] && tabuleiroTTT[a] === tabuleiroTTT[b] && tabuleiroTTT[a] === tabuleiroTTT[c]){
+            jogoAcabouTTT = true;
+            tttStatus.textContent = `✨ Jogador ${tabuleiroTTT[a]} venceu! ✨`;
+            return;
+        }
+    }
+
+    if(tabuleiroTTT.every(c => c !== '')){
+        jogoAcabouTTT = true;
+        tttStatus.textContent = '🤝 Empate! Deu velha 🤝';
+        return;
+    }
+
+    jogadorTTT = jogadorTTT === 'X' ? 'O' : 'X';
+    tttStatus.textContent = `VEZ DO ${jogadorTTT}`;
+}
+
+/* ============================================================
+   MEMÓRIA
+   ============================================================ */
+const memGrid = document.getElementById('mem-grid');
+const memParesEl = document.getElementById('mem-pares');
+const memTentativasEl = document.getElementById('mem-tentativas');
+const emojisMemoria = ['🖤','🩶','✨','🌙','🦋','🍓'];
+let memoriaCartas = [];
+let memoriaViradas = [];
+let memoriaBloqueio = false;
+let memoriaPares = 0;
+let memoriaTentativas = 0;
+
+function embaralhar(arr){
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function reiniciarMemoria(){
+    memoriaCartas = embaralhar([...emojisMemoria, ...emojisMemoria]);
+    memoriaViradas = [];
+    memoriaBloqueio = false;
+    memoriaPares = 0;
+    memoriaTentativas = 0;
+    memParesEl.textContent = memoriaPares;
+    memTentativasEl.textContent = memoriaTentativas;
+    memGrid.innerHTML = '';
+
+    memoriaCartas.forEach((emoji, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card-mem';
+        card.dataset.emoji = emoji;
+        card.dataset.index = idx;
+        card.textContent = '✦';
+        card.addEventListener('click', () => virarCarta(card));
+        memGrid.appendChild(card);
+    });
+}
+
+function virarCarta(card){
+    if(memoriaBloqueio || card.classList.contains('virada') || card.classList.contains('certa')) return;
+    if(memoriaViradas.length >= 2) return;
+
+    card.classList.add('virada');
+    card.textContent = card.dataset.emoji;
+    memoriaViradas.push(card);
+
+    if(memoriaViradas.length === 2){
+        memoriaBloqueio = true;
+        memoriaTentativas++;
+        memTentativasEl.textContent = memoriaTentativas;
+
+        const [a,b] = memoriaViradas;
+        if(a.dataset.emoji === b.dataset.emoji){
+            setTimeout(() => {
+                a.classList.add('certa');
+                b.classList.add('certa');
+                memoriaViradas = [];
+                memoriaBloqueio = false;
+                memoriaPares++;
+                memParesEl.textContent = memoriaPares;
+                if(memoriaPares === emojisMemoria.length){
+                    setTimeout(() => alert('✨ Você venceu a Memória! ✨'), 200);
+                }
+            }, 500);
+        } else {
+            setTimeout(() => {
+                a.classList.remove('virada');
+                b.classList.remove('virada');
+                a.textContent = '✦';
+                b.textContent = '✦';
+                memoriaViradas = [];
+                memoriaBloqueio = false;
+            }, 700);
+        }
+    }
+}
+
+/* ============================================================
+   SNAKE
+   ============================================================ */
+const snakeBoard = document.getElementById('snake-board');
+const snakeScoreEl = document.getElementById('snake-score');
+const snakeBestEl = document.getElementById('snake-best');
+const GRID = 20;
+let snakeCells = [];
+let snakeTimer = null;
+let snakeDirection = 'right';
+let nextDirection = 'right';
+let snake = [];
+let food = {x:10, y:10};
+let snakeScore = 0;
+let snakeBest = Number(localStorage.getItem('snakeBest') || 0);
+snakeBestEl.textContent = snakeBest;
+
+function buildSnakeBoard(){
+    snakeBoard.innerHTML = '';
+    snakeCells = [];
+    for(let i = 0; i < GRID * GRID; i++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        snakeBoard.appendChild(cell);
+        snakeCells.push(cell);
+    }
+}
+
+function placeFood(){
+    let pos;
+    do{
+        pos = {
+            x: Math.floor(Math.random() * GRID),
+            y: Math.floor(Math.random() * GRID)
+        };
+    } while(snake.some(s => s.x === pos.x && s.y === pos.y));
+    food = pos;
+}
+
+function resetSnakeState(){
+    snake = [
+        {x:9,y:10},
+        {x:8,y:10},
+        {x:7,y:10}
+    ];
+    snakeDirection = 'right';
+    nextDirection = 'right';
+    snakeScore = 0;
+    snakeScoreEl.textContent = snakeScore;
+    placeFood();
+    drawSnake();
+}
+
+function iniciarSnake(){
+    buildSnakeBoard();
+    resetSnakeState();
+    pararSnake();
+    snakeTimer = setInterval(stepSnake, 130);
+}
+
+function pararSnake(){
+    if(snakeTimer){ clearInterval(snakeTimer); snakeTimer = null; }
+}
+
+function reiniciarSnake(){
+    iniciarSnake();
+}
+
+function stepSnake(){
+    snakeDirection = nextDirection;
+    const head = {...snake[0]};
+    if(snakeDirection === 'right') head.x++;
+    if(snakeDirection === 'left') head.x--;
+    if(snakeDirection === 'up') head.y--;
+    if(snakeDirection === 'down') head.y++;
+
+    if(head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID ||
+       snake.some((s, i) => i !== 0 && s.x === head.x && s.y === head.y)){
+        pararSnake();
+        snakeScoreEl.textContent = `game over (${snakeScore})`;
+        return;
+    }
+
+    snake.unshift(head);
+
+    if(head.x === food.x && head.y === food.y){
+        snakeScore += 1;
+        snakeScoreEl.textContent = snakeScore;
+        if(snakeScore > snakeBest){
+            snakeBest = snakeScore;
+            snakeBestEl.textContent = snakeBest;
+            localStorage.setItem('snakeBest', snakeBest);
+        }
+        placeFood();
+    } else {
+        snake.pop();
+    }
+
+    drawSnake();
+}
+
+function drawSnake(){
+    snakeCells.forEach(c => c.className = 'cell');
+    snake.forEach((part, i) => {
+        const index = part.y * GRID + part.x;
+        if(snakeCells[index]) snakeCells[index].classList.add(i === 0 ? 'snake2' : 'snake');
+    });
+    const foodIndex = food.y * GRID + food.x;
+    if(snakeCells[foodIndex]) snakeCells[foodIndex].classList.add('food');
+}
+
+/* ============================================================
+   DODGE
+   ============================================================ */
+const dodgeArea = document.getElementById('dodge-area');
+const player = document.getElementById('player');
+const dodgeTimeEl = document.getElementById('dodge-time');
+const dodgeBestEl = document.getElementById('dodge-best');
+let dodgeBlocks = [];
+let dodgeRunning = false;
+let dodgeFrame = null;
+let dodgeTimer = null;
+let dodgeTime = 0;
+let dodgeBest = Number(localStorage.getItem('dodgeBest') || 0);
+dodgeBestEl.textContent = dodgeBest;
+let playerX = 50;
+
+function movePlayer(dir){
+    const areaWidth = dodgeArea.clientWidth;
+    playerX += dir * 26;
+    playerX = Math.max(0, Math.min(areaWidth - 54, playerX));
+    player.style.left = playerX + 'px';
+    player.style.transform = 'translateX(0)';
+}
+
+function reiniciarDodge(){
+    iniciarDodge();
+}
+
+function iniciarDodge(){
+    pararDodge();
+    dodgeBlocks = [];
+    dodgeRunning = true;
+    dodgeTime = 0;
+    dodgeTimeEl.textContent = dodgeTime;
+    playerX = (dodgeArea.clientWidth / 2) - 27;
+    player.style.left = playerX + 'px';
+    player.style.transform = 'translateX(0)';
+    document.querySelectorAll('.block').forEach(b => b.remove());
+    dodgeTimer = setInterval(() => {
+        if(!dodgeRunning) return;
+        dodgeTime++;
+        dodgeTimeEl.textContent = dodgeTime;
+        if(dodgeTime > dodgeBest){
+            dodgeBest = dodgeTime;
+            dodgeBestEl.textContent = dodgeBest;
+            localStorage.setItem('dodgeBest', dodgeBest);
+        }
+    }, 1000);
+    loopDodge();
+}
+
+function criarBloco(){
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.style.left = Math.floor(Math.random() * (dodgeArea.clientWidth - 42)) + 'px';
+    block.style.top = '-45px';
+    dodgeArea.appendChild(block);
+    dodgeBlocks.push({el:block, x: parseFloat(block.style.left), y:-45, speed:2.4 + Math.random() * 2.5});
+}
+
+function loopDodge(){
+    if(!dodgeRunning) return;
+    if(Math.random() < 0.06 && dodgeBlocks.length < 9) criarBloco();
+
+    const px = player.offsetLeft;
+    const py = player.offsetTop;
+
+    dodgeBlocks.forEach((b, i) => {
+        b.y += b.speed;
+        b.el.style.top = b.y + 'px';
+        const bx = b.el.offsetLeft;
+        const by = b.el.offsetTop;
+        const bw = b.el.offsetWidth;
+        const bh = b.el.offsetHeight;
+        const pw = player.offsetWidth;
+        const ph = player.offsetHeight;
+
+        const hit = px < bx + bw && px + pw > bx && py < by + bh && py + ph > by;
+        if(hit){
+            fimDodge();
+            return;
+        }
+        if(b.y > dodgeArea.clientHeight + 50){
+            b.el.remove();
+            dodgeBlocks.splice(i, 1);
+        }
+    });
+
+    dodgeFrame = requestAnimationFrame(loopDodge);
+}
+
+function fimDodge(){
+    if(!dodgeRunning) return;
+    dodgeRunning = false;
+    if(dodgeTimer) clearInterval(dodgeTimer);
+    dodgeTimer = null;
+    cancelAnimationFrame(dodgeFrame);
+    dodgeTimeEl.textContent = `${dodgeTime} (fim!)`;
+}
+
+function pararDodge(){
+    dodgeRunning = false;
+    if(dodgeTimer) clearInterval(dodgeTimer);
+    dodgeTimer = null;
+    if(dodgeFrame) cancelAnimationFrame(dodgeFrame);
+    dodgeFrame = null;
+    dodgeBlocks.forEach(b => b.el.remove());
+    dodgeBlocks = [];
+}
+
+/* ============================================================
+   ALVO
+   ============================================================ */
+const targetArea = document.getElementById('target-area');
+const target = document.getElementById('target');
+const targetScoreEl = document.getElementById('target-score');
+const targetTimeEl = document.getElementById('target-time');
+let targetScore = 0;
+let targetTime = 30;
+let targetTimer = null;
+
+function posicaoAlvo(){
+    const maxX = targetArea.clientWidth - 56;
+    const maxY = targetArea.clientHeight - 56;
+    const x = Math.floor(Math.random() * maxX);
+    const y = Math.floor(Math.random() * maxY);
+    target.style.left = x + 'px';
+    target.style.top = y + 'px';
+}
+
+function clicarAlvo(){
+    if(targetTime <= 0) return;
+    targetScore++;
+    targetScoreEl.textContent = targetScore;
+    posicaoAlvo();
+}
+
+function iniciarAlvo(){
+    pararAlvo();
+    targetScore = 0;
+    targetTime = 30;
+    targetScoreEl.textContent = targetScore;
+    targetTimeEl.textContent = targetTime;
+    posicaoAlvo();
+    targetTimer = setInterval(() => {
+        targetTime--;
+        targetTimeEl.textContent = targetTime;
+        if(targetTime <= 0){
+            clearInterval(targetTimer);
+            targetTimer = null;
+            targetTimeEl.textContent = '0 (fim!)';
+        }
+    }, 1000);
+}
+
+function reiniciarAlvo(){
+    iniciarAlvo();
+}
+
+function pararAlvo(){
+    if(targetTimer){ clearInterval(targetTimer); targetTimer = null; }
+}
+
+/* ============================================================
+   PEDRA PAPEL TESOURA
+   ============================================================ */
+function jogarPPT(escolha){
+    const opcoes = ['Pedra', 'Papel', 'Tesoura'];
+    const pc = opcoes[Math.floor(Math.random() * 3)];
+    let resultado = '';
+
+    if(escolha === pc){
+        resultado = '🤝 Empate!';
+    } else if(
+        (escolha === 'Pedra' && pc === 'Tesoura') ||
+        (escolha === 'Papel' && pc === 'Pedra') ||
+        (escolha === 'Tesoura' && pc === 'Papel')
+    ){
+        resultado = '🎉 Você venceu!';
+    } else {
+        resultado = '💀 Computador venceu!';
+    }
+
+    document.getElementById('ppt-resultado').innerHTML =
+        `Você: <strong style="color:var(--verde)">${escolha}</strong><br>
+         Computador: <strong style="color:var(--prata)">${pc}</strong><br><br>
+         ${resultado}`;
+}
+
+/* ============================================================
+   ADIVINHE O NÚMERO
+   ============================================================ */
+let numeroSecreto = 0;
+
+function reiniciarNumero(){
+    numeroSecreto = Math.floor(Math.random() * 100) + 1;
+    document.getElementById('palpite').value = '';
+    document.getElementById('numero-msg').textContent = '';
+}
+
+function verificarNumero(){
+    const palpite = parseInt(document.getElementById('palpite').value);
+    const msg = document.getElementById('numero-msg');
+
+    if(isNaN(palpite) || palpite < 1 || palpite > 100){
+        msg.textContent = 'Digite um número entre 1 e 100.';
+        return;
+    }
+
+    if(palpite === numeroSecreto){
+        msg.textContent = '🎉 Acertou!';
+    } else if(palpite < numeroSecreto){
+        msg.textContent = '⬆️ O número secreto é maior.';
+    } else {
+        msg.textContent = '⬇️ O número secreto é menor.';
+    }
+}
+
+/* ============================================================
+   TESTE DE REFLEXO
+   ============================================================ */
+let reflexInicio = 0;
+let reflexTimer = null;
+let reflexPronto = false;
+
+function prepararReflexo(){
+    pararReflexo();
+    reflexPronto = false;
+    const btn = document.getElementById('reflex-btn');
+    btn.textContent = 'Aguarde...';
+    btn.style.background = 'rgba(192,192,192,0.12)';
+    btn.style.color = 'var(--prata)';
+    document.getElementById('reflex-tempo').textContent = '';
+
+    reflexTimer = setTimeout(() => {
+        reflexPronto = true;
+        reflexInicio = Date.now();
+        btn.textContent = 'CLIQUE!';
+        btn.style.background = 'linear-gradient(135deg, var(--verde-esc), var(--verde))';
+        btn.style.color = '#062b12';
+    }, 2000 + Math.random() * 3000);
+}
+
+function clicouReflexo(){
+    const btn = document.getElementById('reflex-btn');
+    const tempoEl = document.getElementById('reflex-tempo');
+
+    if(!reflexPronto){
+        tempoEl.textContent = '⏳ Muito cedo! Espere o botão mudar.';
+        return;
+    }
+
+    const tempo = Date.now() - reflexInicio;
+    tempoEl.textContent = `⚡ Tempo: ${tempo} ms`;
+    reflexPronto = false;
+    btn.textContent = 'Aguarde...';
+    btn.style.background = 'rgba(192,192,192,0.12)';
+    btn.style.color = 'var(--prata)';
+
+    // Prepara próximo round
+    prepararReflexo();
+}
+
+function pararReflexo(){
+    if(reflexTimer){ clearTimeout(reflexTimer); reflexTimer = null; }
+    reflexPronto = false;
+}
+
+/* ============================================================
+   TECLADO (SNAKE + DODGE)
+   ============================================================ */
+window.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    // Snake
+    if(secoes.snake.classList.contains('ativa')){
+        if((key === 'ArrowUp' || key === 'w') && snakeDirection !== 'down') nextDirection = 'up';
+        if((key === 'ArrowDown' || key === 's') && snakeDirection !== 'up') nextDirection = 'down';
+        if((key === 'ArrowLeft' || key === 'a') && snakeDirection !== 'right') nextDirection = 'left';
+        if((key === 'ArrowRight' || key === 'd') && snakeDirection !== 'left') nextDirection = 'right';
+    }
+
+    // Dodge
+    if(secoes.dodge.classList.contains('ativa') && dodgeRunning){
+        if(key === 'ArrowLeft' || key === 'a') movePlayer(-1);
+        if(key === 'ArrowRight' || key === 'd') movePlayer(1);
+    }
+});
+
+/* ============================================================
+   INICIALIZAÇÃO (pré-login)
+   ============================================================ */
+// Pré-carrega o tabuleiro do snake e estados iniciais
+buildSnakeBoard();
+resetSnakeState();
+reiniciarTTT();
+</script>
+
+</body>
+</html>
